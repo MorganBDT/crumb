@@ -1,0 +1,13 @@
+.idea/
+data/
+plots/
+bin/
+dataloaders/*_task_filelists
+dataloaders/imagenet_dirmap.csv
+dataloaders/imagenet900_dirmap.csv
+*__pycache__/
+*_outputs/
+*_outputs_*/
+*.pth
+*.txt
+*.zip
