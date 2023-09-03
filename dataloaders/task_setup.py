@@ -88,22 +88,26 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
 
         ## Resample to get equal number of images per class (only in training set - keep all test images).
 
-        # Calculate the number of rows to sample for each class
-        sample_size = train_combined['class'].value_counts().min()
-        print("Min number of examples per class in train set in core50+ilab2mlight: ", sample_size)
+        balanced_splits = []
+        for idx, combined_split in enumerate([train_combined, test_combined]):
+            # Calculate the number of rows to sample for each class
+            sample_size = combined_split['class'].value_counts().min()
+            print("Min # examples per class in " + ["train", "test"][idx] + " set of core50+ilab2mlight: ", sample_size)
 
-        # Create an empty DataFrame to store the balanced data
-        balanced_dirmap = combined_dirmap.iloc[:0].copy()
+            # Create an empty DataFrame to store the balanced data
+            balanced_dirmap = combined_dirmap.iloc[:0].copy()
 
-        # Iterate through each unique class value
-        for class_value in train_combined['class'].unique():
-            # Sample the required number of rows for this class
-            sampled_rows = train_combined[train_combined['class'] == class_value].sample(sample_size, replace=False)
+            # Iterate through each unique class value
+            for class_value in combined_split['class'].unique():
+                # Sample the required number of rows for this class
+                sampled_rows = combined_split[combined_split['class'] == class_value].sample(sample_size, replace=False, random_state=0)
 
-            # Append the sampled rows to the balanced DataFrame
-            balanced_dirmap = pd.concat([balanced_dirmap, sampled_rows])
+                # Append the sampled rows to the balanced DataFrame
+                balanced_dirmap = pd.concat([balanced_dirmap, sampled_rows])
 
-        balanced_all = pd.concat([balanced_dirmap, test_combined], ignore_index=True)
+            balanced_splits.append(balanced_dirmap)
+
+        balanced_all = pd.concat(balanced_splits, ignore_index=True)
         balanced_all = balanced_all.sort_values(by=["class", "object", "session", "im_num"], ignore_index=True)
 
         examples = balanced_all
