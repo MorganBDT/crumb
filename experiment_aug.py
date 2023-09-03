@@ -115,6 +115,8 @@ def run(args, run, task_range=None):
         agent_config["n_class"] = 1000
     elif args.dataset == "imagenet900":
         agent_config["n_class"] = 900
+    elif args.dataset == "core50+ilab2mlight":
+        agent_config["n_class"] = 24
     else:
         raise ValueError("Invalid dataset name, try 'core50', 'toybox', or 'ilab2mlight' or 'cifar100'")
 
@@ -127,7 +129,7 @@ def run(args, run, task_range=None):
         # get test data
         test_data = datasets.CORE50(
                     dataroot = args.dataroot, filelist_root = args.filelist_root, scenario = args.scenario, offline = args.offline, run = run, train = False, transform=composed)
-    elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900"]:
+    elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "core50+ilab2mlight"]:
         # image transformations
         composed = transforms.Compose(
             [transforms.Resize([224, 224]), transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
@@ -203,7 +205,7 @@ def train(agent, transforms, args, run, tasks, active_out_nodes, test_data, val_
                 train_data = datasets.CORE50(
                     dataroot=args.dataroot, filelist_root=args.filelist_root, scenario=args.scenario,
                     offline=args.offline, run=run, batch=task, transform=transforms)
-            elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet"]:
+            elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet", "core50+ilab2mlight"]:
                 train_data = datasets.Generic_Dataset(
                     dataroot=args.dataroot, dataset=args.dataset, filelist_root=args.filelist_root, scenario=args.scenario,
                     offline=args.offline, run=run, batch=task, transform=transforms)
@@ -269,7 +271,7 @@ def train(agent, transforms, args, run, tasks, active_out_nodes, test_data, val_
                 train_data = datasets.CORE50(
                     dataroot=args.dataroot, filelist_root=args.filelist_root, scenario=args.scenario,
                     offline=args.offline, run=run, batch=task, transform=transforms)
-            elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900"]:
+            elif args.dataset in ["toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "core50+ilab2mlight"]:
                 train_data = datasets.Generic_Dataset(
                     dataroot=args.dataroot, dataset=args.dataset, filelist_root=args.filelist_root, scenario=args.scenario,
                     offline=args.offline, run=run, batch=task, transform=transforms)

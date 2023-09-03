@@ -36,10 +36,13 @@ def sample_frames_core50(examples, sample_rate=20, first_frame=10, max_frames=No
 
 
 # split into training and testing based on choice of session    
-def train_test_split(dataset, outdir, test_sess):
+def train_test_split(dataset, outdir, test_sess, o2=False):
 
     # get directory map of dataset (core50, toybox, etc)
-    dirmap = pd.read_csv(os.path.join(outdir, dataset + '_dirmap.csv'))
+    if '+' not in dataset: # if not a combined dataset, like core50+ilab2mlight
+        dirmap = pd.read_csv(os.path.join(outdir, dataset + '_dirmap.csv'))
+    else:
+        dirmap = None
 
     # sample frames from sessions
     # core50 videos were taken 20fps, so sampling every 20 images is equivalent to sampling one frame per second
@@ -53,6 +56,58 @@ def train_test_split(dataset, outdir, test_sess):
         examples = dirmap
     elif dataset == 'cifar100' or dataset == 'imagenet' or dataset == 'imagenet900':
         examples = dirmap
+    elif dataset == 'core50+ilab2mlight':
+        core50_dirmap = sample_frames_core50(pd.read_csv(os.path.join(outdir, 'core50_dirmap.csv')))
+        ilab2mlight_dirmap = pd.read_csv(os.path.join(outdir, 'ilab2mlight_dirmap.csv'))
+
+        # MODIFY iLAB FORMAT TO APPEND TO CORe50
+        core50_dirmap = core50_dirmap[["class", "object", "session", "im_num", "im_path"]]
+        ilab2mlight_dirmap = ilab2mlight_dirmap[["class", "object", "session", "im_num", "im_path"]]
+
+        # Reindex ilab sessions from 1-8 with test set sessions 4 and 8, to 12-19 with test sessions 15 and 19
+        # This allows 11 core50 sessions to be separate.
+        ilab2mlight_dirmap["session"] = ilab2mlight_dirmap["session"] + 11
+
+        # Reindex ilab classes to start counting from 11 instead of 1, to allow the 10 CORe50 classes to be separate
+        ilab2mlight_dirmap["class"] = ilab2mlight_dirmap["class"] + 10
+
+        ## APPEND DIRECTORY NAMES
+        if o2:
+            ilab2mlight_dir = "iLab-2M-Light"
+            core50_dir = "core50"
+        else:
+            ilab2mlight_dir = os.path.join("ilab2M", "iLab-2M-Light")
+            core50_dir = "Core50"
+        ilab2mlight_dirmap['im_path'] = ilab2mlight_dir + "/" + ilab2mlight_dirmap['im_path'].astype(str)
+        core50_dirmap['im_path'] = core50_dir + "/" + core50_dirmap['im_path'].astype(str)
+
+        combined_dirmap = pd.concat([core50_dirmap, ilab2mlight_dirmap], ignore_index=True)
+
+        train_combined = combined_dirmap[~combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
+        test_combined = combined_dirmap[combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
+
+        ## Resample to get equal number of images per class (only in training set - keep all test images).
+
+        # Calculate the number of rows to sample for each class
+        sample_size = train_combined['class'].value_counts().min()
+        print("Min number of examples per class in train set in core50+ilab2mlight: ", sample_size)
+
+        # Create an empty DataFrame to store the balanced data
+        balanced_dirmap = combined_dirmap.iloc[:0].copy()
+
+        # Iterate through each unique class value
+        for class_value in train_combined['class'].unique():
+            # Sample the required number of rows for this class
+            sampled_rows = train_combined[train_combined['class'] == class_value].sample(sample_size, replace=False)
+
+            # Append the sampled rows to the balanced DataFrame
+            balanced_dirmap = pd.concat([balanced_dirmap, sampled_rows])
+
+        balanced_all = pd.concat([balanced_dirmap, test_combined], ignore_index=True)
+        balanced_all = balanced_all.sort_values(by=["class", "object", "session", "im_num"], ignore_index=True)
+
+        examples = balanced_all
+
     else:
         raise ValueError("Invalid dataset name")
     
@@ -64,11 +119,11 @@ def train_test_split(dataset, outdir, test_sess):
     
 
 # setup files containing image paths/labels for each task in the iid scenario
-def iid_task_setup(dataset='core50', n_runs = 10, task_size = 1200, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders'):
+def iid_task_setup(dataset='core50', n_runs = 10, task_size = 1200, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False):
     
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
-    train, test = train_test_split(dataset, outdir, test_sess)
+    train, test = train_test_split(dataset, outdir, test_sess, o2=o2)
     
     # creating tasks for each run
     for run in range(n_runs):
@@ -78,11 +133,11 @@ def iid_task_setup(dataset='core50', n_runs = 10, task_size = 1200, sample_rate 
 
 # setup files containing image paths/labels for each task in the class iid scenario
 # nclass is number of classes per task
-def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir='dataloaders'):
+def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir='dataloaders', o2=False):
     
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
-    train, test = train_test_split(dataset, outdir, test_sess)
+    train, test = train_test_split(dataset, outdir, test_sess, o2=o2)
     
     # creating tasks for each run
     for run in range(n_runs):
@@ -92,11 +147,11 @@ def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate
 
 # setup files containing image paths/labels for each task in the instance setting
 # ninstance is number of instances per task
-def instance_task_setup(dataset='core50', n_runs = 10, n_instance = 80, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders'):
+def instance_task_setup(dataset='core50', n_runs = 10, n_instance = 80, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False):
 
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
-    train, test = train_test_split(dataset, outdir, test_sess)
+    train, test = train_test_split(dataset, outdir, test_sess, o2=o2)
     
     # creating tasks for each run
     for run in range(n_runs):
@@ -106,11 +161,11 @@ def instance_task_setup(dataset='core50', n_runs = 10, n_instance = 80, sample_r
 
 # setup files containing image paths/labels for each task in the class scenario
 # nclass is number of classes per task
-def class_instance_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders'):
+def class_instance_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False):
     
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
-    train, test = train_test_split(dataset, outdir, test_sess)
+    train, test = train_test_split(dataset, outdir, test_sess, o2=o2)
     
     # creating tasks for each run
     for run in range(n_runs):
@@ -414,16 +469,16 @@ def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dat
 def write_task_filelists(args):
     
     if args.scenario == 'iid':
-        iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, task_size = args.task_size_iid, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root)
+        iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, task_size = args.task_size_iid, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
         
     elif args.scenario == 'class_iid':
-        class_iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root)
+        class_iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
     
     elif args.scenario == 'instance':
-        instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_instance = args.n_instance, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root)
+        instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_instance = args.n_instance, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
         
     elif args.scenario == 'class_instance':
-        class_instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root)
+        class_instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
 
 
 def get_args(argv):
@@ -441,6 +496,7 @@ def get_args(argv):
     parser.add_argument('--sample_rate', type=int, default=20, help="Sample an image every x frames")
     parser.add_argument('--test_sess', nargs="+", default=[3, 7, 10], type=int, help="Which sessions to use for testing")
     parser.add_argument('--offline', default=False, action='store_true', dest='offline')
+    parser.add_argument('--o2', default=False, action='store_true', dest='o2', help="If formulating combined datasets for o2 cluster, use this flag")
 
     # directories
     parser.add_argument('--root', type=str, default='dataloaders', help="Directory that contains the data")
