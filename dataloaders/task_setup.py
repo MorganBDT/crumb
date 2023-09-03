@@ -74,10 +74,10 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         ## APPEND DIRECTORY NAMES
         if o2:
             ilab2mlight_dir = os.path.join("iLab-2M-Light", "train_img_distributed")
-            core50_dir = "core50"
+            core50_dir = os.path.join("core50", "core50_128x128")
         else:
             ilab2mlight_dir = os.path.join("ilab2M", "iLab-2M-Light", "train_img_distributed")
-            core50_dir = "Core50"
+            core50_dir = os.path.join("Core50", "core50_128x128")
         ilab2mlight_dirmap['im_path'] = ilab2mlight_dir + "/" + ilab2mlight_dirmap['im_path'].astype(str)
         core50_dirmap['im_path'] = core50_dir + "/" + core50_dirmap['im_path'].astype(str)
 
