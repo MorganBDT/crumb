@@ -23,6 +23,6 @@ mkdir -p ${OUTDIR}/class_iid/L2_SqueezeNet/
 #mkdir -p ${OUTDIR}/instance/L2_SqueezeNet/
 mkdir -p ${OUTDIR}/class_instance/L2_SqueezeNet/
 
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid    --lr 0.0001   --reg_coef 100   --n_runs 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name L2  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/L2_SqueezeNet/log.log           #&
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid    --lr 0.0001   --reg_coef 100   --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name L2  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/L2_SqueezeNet/log.log           #&
 
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance  --lr 0.0001 --reg_coef 100  --n_runs 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name L2  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/L2_SqueezeNet/log.log
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance  --lr 0.0001 --reg_coef 100  --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name L2  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/L2_SqueezeNet/log.log
