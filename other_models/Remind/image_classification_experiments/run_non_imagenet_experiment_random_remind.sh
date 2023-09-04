@@ -25,6 +25,10 @@ elif [ "$DATASET" = "cifar100" ]; then
     #DATAROOT="/media/data/morgan_data/cifar100"
     BASE_MAX_CLASS=5
     NUM_CLASSES=100
+elif [ "$DATASET" = "core50+ilab2mlight" ]; then
+    DATAROOT="/n/groups/kreiman/shared_data"
+    BASE_MAX_CLASS=2
+    NUM_CLASSES=24
 else
     echo "Invalid dataset name!"
     exit
