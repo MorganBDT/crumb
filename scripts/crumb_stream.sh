@@ -49,7 +49,7 @@ elif [ "$DATASET" = "imagenet" ]; then
 elif [ "$DATASET" = "core50+ilab2mlight" ]; then
     #DDATAROOT="./data/iLab-2M-Light/train_img_distributed"
     DDATAROOT="/media/data/Datasets"
-    MEMORY_SIZE=417
+    MEMORY_SIZE=834
     BATCH_SIZE=21
     N_RUNS=10
 else

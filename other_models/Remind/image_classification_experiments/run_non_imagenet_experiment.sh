@@ -10,25 +10,30 @@ if [ "$DATASET" = "core50" ]; then
     #DATAROOT="/media/data/Datasets/Core50"
     BASE_MAX_CLASS=2
     NUM_CLASSES=10
+    MAX_BUFFER_SIZE=417
 elif [ "$DATASET" = "toybox" ]; then
     DATAROOT="/n/groups/kreiman/shared_data/toybox/images"
     #DATAROOT="/media/data/morgan_data/toybox/images"
     BASE_MAX_CLASS=2
     NUM_CLASSES=12
+    MAX_BUFFER_SIZE=417
 elif [ "$DATASET" = "ilab2mlight" ]; then
     DATAROOT="/n/groups/kreiman/shared_data/iLab-2M-Light/train_img_distributed"
     #DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
     BASE_MAX_CLASS=2
     NUM_CLASSES=14
+    MAX_BUFFER_SIZE=417
 elif [ "$DATASET" = "cifar100" ]; then
     DATAROOT="/n/groups/kreiman/shared_data/cifar100"
     #DATAROOT="/media/data/morgan_data/cifar100"
     BASE_MAX_CLASS=5
     NUM_CLASSES=100
+    MAX_BUFFER_SIZE=2782
 elif [ "$DATASET" = "core50+ilab2mlight" ]; then
     DATAROOT="/n/groups/kreiman/shared_data"
     BASE_MAX_CLASS=2
     NUM_CLASSES=24
+    MAX_BUFFER_SIZE=834
 else
     echo "Invalid dataset name!"
     exit
@@ -45,7 +50,6 @@ CLASS_INCREMENT=${BASE_MAX_CLASS}
 #modify everything above; NOT below
 
 REPLAY_SAMPLES=50
-MAX_BUFFER_SIZE=417
 CODEBOOK_SIZE=256
 NUM_CODEBOOKS=32
 BASE_INIT_CKPT=./squeezenet_ckpts/best_SqueezeNetClassifyAfterLayer12_base_init_"$DATASET"_"$SCENARIO"_run${RUN}.pth # base init ckpt

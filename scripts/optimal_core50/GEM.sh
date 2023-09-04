@@ -6,13 +6,17 @@ GPU="${2:-0}"
 
 if [ "$DATASET" = "core50" ]; then
     DATAROOT="/media/data/Datasets/Core50"
+    MEMORY_SIZE=15
 elif [ "$DATASET" = "toybox" ]; then
     DATAROOT="/media/data/morgan_data/toybox/images"
+    MEMORY_SIZE=15
 elif [ "$DATASET" = "ilab2mlight" ]; then
     #DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light"
     DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
+    MEMORY_SIZE=15
 elif [ "$DATASET" = "core50+ilab2mlight" ]; then
     DATAROOT="/media/data/Datasets"
+    MEMORY_SIZE=30
 else
     echo "Invalid dataset name!"
     exit
@@ -25,6 +29,6 @@ mkdir -p ${OUTDIR}/class_instance/GEM_SqueezeNet/
 
 
 #python -u experiment.py --scenario iid                --n_runs 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid 0 --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 30 | tee ${OUTDIR}/iid/GEM_SqueezeNet/log.log  &
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid    --lr 0.0001      --n_runs 10 --n_epoch_first_task 10 --memory_size 15  --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/GEM_SqueezeNet/log.log           #&
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid    --lr 0.0001      --n_runs 10 --n_epoch_first_task 10 --memory_size $MEMORY_SIZE  --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/GEM_SqueezeNet/log.log           #&
 #python -u experiment.py --scenario instance           --n_runs 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid 0 --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 30 | tee ${OUTDIR}/instance/GEM_SqueezeNet/log.log            #&
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance   --lr 0.0001  --n_runs 10 --n_epoch_first_task 10 --memory_size 15  --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/GEM_SqueezeNet/log.log
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance   --lr 0.0001  --n_runs 10 --n_epoch_first_task 10 --memory_size $MEMORY_SIZE  --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type exp_replay --agent_name GEM  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/GEM_SqueezeNet/log.log
