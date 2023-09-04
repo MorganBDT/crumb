@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -c 4                               # Request 4 cores
-#SBATCH -t 0-5:00                         # Runtime in D-HH:MM format
+#SBATCH -t 0-8:00                         # Runtime in D-HH:MM format
 #SBATCH --mem=16000M                         # Memory total in MB (for all cores)
 #SBATCH -p gpu                             # Partition to run in (e.g. short, gpu)
 #SBATCH --gres=gpu:teslaK80:1
