@@ -67,12 +67,12 @@ def streaming(args, remind):
     else:
         print('\nPerforming base initialization...')
         base_train_loader = get_data_loader('train', min_class=args.min_class, max_class=args.base_init_classes, args=args, return_item_ix=True)
-        feat_data, label_data, item_ix_data = extract_base_init_features(base_train_loader, args.images_dir, args.label_dir,
+        feat_data, label_data, item_ix_data = extract_base_init_features(args.images_dir, args.label_dir,
                                                                          args.extract_features_from,
                                                                          args.classifier_ckpt,
                                                                          args.base_arch, args.base_init_classes,
                                                                          args.num_channels,
-                                                                         args.spatial_feat_dim, remind_model=remind)
+                                                                         args.spatial_feat_dim, remind_model=remind, base_train_loader=base_train_loader)
         pq, latent_dict, rehearsal_ixs, class_id_to_item_ix_dict = fit_pq(feat_data, label_data, item_ix_data,
                                                                           args.num_channels,
                                                                           args.spatial_feat_dim, args.num_codebooks,
