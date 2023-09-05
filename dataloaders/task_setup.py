@@ -128,7 +128,7 @@ def class_shuffle_dataset_transfer(classes_by_dataset):
     for dataset_classes in classes_by_dataset:
         np.random.shuffle(dataset_classes)
         class_ids_shuffled.extend(list(dataset_classes))
-        return np.array(class_ids_shuffled)
+        return np.array([int(x) for x in class_ids_shuffled], dtype=np.uint8)
 
 
 # setup files containing image paths/labels for each task in the iid scenario
