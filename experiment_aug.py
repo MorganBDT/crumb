@@ -572,8 +572,8 @@ def main():
     args.output_dir = os.path.join(os.getcwd(),args.output_dir)
 
     # ensure that a valid scenario has been passed
-    if args.scenario not in ['iid', 'class_iid', 'instance', 'class_instance']:
-        print('Invalid scenario passed, must be one of: iid, class_iid, instance, class_instance')
+    if args.scenario not in ['iid', 'class_iid', 'instance', 'class_instance', 'class_iid_transfer', 'class_instance_transfer']:
+        print('Invalid scenario passed, must be one of: iid, class_iid, instance, class_instance, class_iid_transfer, class_instance_transfer')
         return
 
     total_path = get_out_path(args)
