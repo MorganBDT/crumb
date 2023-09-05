@@ -146,7 +146,7 @@ def iid_task_setup(dataset='core50', n_runs = 10, task_size = 1200, sample_rate 
 
 # setup files containing image paths/labels for each task in the class iid scenario
 # nclass is number of classes per task
-def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir='dataloaders', o2=False, classes_per_dataset=None):
+def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir='dataloaders', o2=False, classes_per_dataset=None, setting="class_iid"):
     
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
@@ -155,7 +155,7 @@ def class_iid_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate
     # creating tasks for each run
     for run in range(n_runs):
         # passing a copy so the original train df is not modified
-        class_iid_task_filelist(train.copy(), test, run, n_class, offline, outdir, dataset=dataset, classes_per_dataset=classes_per_dataset)
+        class_iid_task_filelist(train.copy(), test, run, n_class, offline, outdir, dataset=dataset, classes_per_dataset=classes_per_dataset, setting=setting)
 
 
 # setup files containing image paths/labels for each task in the instance setting
@@ -174,7 +174,7 @@ def instance_task_setup(dataset='core50', n_runs = 10, n_instance = 80, sample_r
 
 # setup files containing image paths/labels for each task in the class scenario
 # nclass is number of classes per task
-def class_instance_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False, classes_per_dataset=None):
+def class_instance_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False, classes_per_dataset=None, setting="class_instance"):
     
     # split into training and testing
     # default is to use sessions 3,7, & 10 for testing, the rest for training
@@ -183,7 +183,7 @@ def class_instance_task_setup(dataset='core50', n_runs = 10, n_class = 2, sample
     # creating tasks for each run
     for run in range(n_runs):
         # passing a copy so the original train df is not modified
-        class_instance_task_filelist(train.copy(), test, run, n_class, offline,  outdir, dataset=dataset, classes_per_dataset=classes_per_dataset)
+        class_instance_task_filelist(train.copy(), test, run, n_class, offline,  outdir, dataset=dataset, classes_per_dataset=classes_per_dataset, setting=setting)
 
 
 # setup tasks where each task is iid (independently and identically distributed)
@@ -241,7 +241,7 @@ def iid_task_filelist(train, test, run, task_size, offline, outdir, dataset='cor
     train_final.to_csv(run_dir + '/train_all.txt')
 
         
-def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset='core50', classes_per_dataset=None):
+def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset='core50', classes_per_dataset=None, setting="class_iid"):
     
     # defining directory to dump file
     if offline:
@@ -260,8 +260,10 @@ def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset=
     shuffled_classes = train['class'].unique()
     if classes_per_dataset is None:
         np.random.shuffle(shuffled_classes)
-    else:
+    elif setting == "class_iid_transfer":
         shuffled_classes = class_shuffle_dataset_transfer(classes_per_dataset)
+    else:
+        raise ValueError("Error: what setting is being used, class_iid or class_iid_transfer?")
     
     # number of tasks
     n_task = math.ceil(len(shuffled_classes) / n_class)
@@ -402,13 +404,13 @@ def instance_task_filelist(train, test, run, n_instance, sample_rate, offline, o
     train_final.to_csv(run_dir + '/train_all.txt')      
         
     
-def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dataset='core50', classes_per_dataset=None):
+def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dataset='core50', classes_per_dataset=None, setting="class_instance"):
     
     # defining directory to dump file
     if offline:
-        run_dir = outdir + '/' + dataset + '_task_filelists/class_instance/run' + str(run) + '/offline/'
+        run_dir = outdir + '/' + dataset + '_task_filelists/' + setting + '/run' + str(run) + '/offline/'
     else:
-        run_dir = outdir + '/' + dataset + '_task_filelists/class_instance/run' + str(run) + '/stream/'
+        run_dir = outdir + '/' + dataset + '_task_filelists/' + setting + '/run' + str(run) + '/stream/'
     
     # creating directory if it doesn't exist
     if not os.path.exists(run_dir):
@@ -421,8 +423,10 @@ def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dat
     shuffled_classes = train['class'].unique()
     if classes_per_dataset is None:
         np.random.shuffle(shuffled_classes)
-    else:
+    elif setting == "class_instance_transfer":
         shuffled_classes = class_shuffle_dataset_transfer(classes_per_dataset)
+    else:
+        raise ValueError("Error: what setting is being used, class_instance or class_instance_transfer?")
     
     # number of tasks
     n_task = math.ceil(len(shuffled_classes) / n_class)
@@ -500,10 +504,10 @@ def write_task_filelists(args):
         class_instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
 
     elif args.scenario == 'class_iid_transfer':
-        class_iid_task_setup(classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
+        class_iid_task_setup(setting=args.scenario, classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
 
     elif args.scenario == 'class_instance_transfer':
-        class_instance_task_setup(classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
+        class_instance_task_setup(setting=args.scenario, classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
 
 def get_args(argv):
     
