@@ -245,9 +245,9 @@ def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset=
     
     # defining directory to dump file
     if offline:
-        run_dir = outdir + '/' + dataset + '_task_filelists/class_iid/run' + str(run) + '/offline/'
+        run_dir = outdir + '/' + dataset + '_task_filelists/' + setting + '/run' + str(run) + '/offline/'
     else:
-        run_dir = outdir + '/' + dataset + '_task_filelists/class_iid/run' + str(run) + '/stream/'
+        run_dir = outdir + '/' + dataset + '_task_filelists/' + setting + '/run' + str(run) + '/stream/'
     
     # creating directory if it doesn't exist
     if not os.path.exists(run_dir):
