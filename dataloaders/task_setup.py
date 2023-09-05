@@ -4,6 +4,7 @@ import os
 import sys
 import math
 import argparse
+import copy
 
 #core50 dataset components
 #10 classes; 
@@ -125,10 +126,10 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
 def class_shuffle_dataset_transfer(classes_by_dataset):
     """classes_by_dataset should be a list of lists, each list contains the class ids in one dataset."""
     class_ids_shuffled = []
-    for dataset_classes in classes_by_dataset:
+    for dataset_classes in copy.deepcopy(classes_by_dataset):
         np.random.shuffle(dataset_classes)
         class_ids_shuffled.extend(list(dataset_classes))
-        return np.array([int(x) for x in class_ids_shuffled], dtype=np.uint8)
+    return np.array([int(x) for x in class_ids_shuffled], dtype=np.int64)
 
 
 # setup files containing image paths/labels for each task in the iid scenario
@@ -227,6 +228,7 @@ def iid_task_filelist(train, test, run, task_size, offline, outdir, dataset='cor
     classes = train_final['class'].unique()
     class_to_label = {classes[i]:i for i in range(len(classes))}
     train_final['label'] = train_final['class'].map(class_to_label)
+    test = test[test['class'].isin(class_to_label.keys())]
     test['label'] = test['class'].map(class_to_label)
 
 
@@ -296,8 +298,10 @@ def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset=
     classes = train_final['class'].unique()
     class_to_label = {classes[i]:i for i in range(len(classes))}
     train_final['label'] = train_final['class'].map(class_to_label)
+    test = test[test['class'].isin(class_to_label.keys())]
+    test = test[test['class'].isin(class_to_label.keys())]
     test['label'] = test['class'].map(class_to_label)
-    
+
     for b in range(n_task):
         
         # writing task filelist
@@ -388,6 +392,7 @@ def instance_task_filelist(train, test, run, n_instance, sample_rate, offline, o
     classes = train_final['class'].unique()
     class_to_label = {classes[i]:i for i in range(len(classes))}
     train_final['label'] = train_final['class'].map(class_to_label)
+    test = test[test['class'].isin(class_to_label.keys())]
     test['label'] = test['class'].map(class_to_label)
     
     for b in range(n_task):
@@ -474,6 +479,7 @@ def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dat
     classes = train_final['class'].unique()
     class_to_label = {classes[i]:i for i in range(len(classes))}
     train_final['label'] = train_final['class'].map(class_to_label)
+    test = test[test['class'].isin(class_to_label.keys())]
     test['label'] = test['class'].map(class_to_label)
     
     for b in range(n_task):
@@ -519,7 +525,7 @@ def get_args(argv):
     parser.add_argument('--scenario', type=str, default='iid', help="How to set up tasks, e.g. iid => randomly assign data to each task")
     parser.add_argument('--n_runs', type=int, default=10, help="Number of times to repeat the experiment with different data orderings")
     parser.add_argument('--task_size_iid', type=int, default=1200, help="Number of examples per task, only applicable for the iid setting")
-    parser.add_argument('--n_class', type=int, default=2, help="Number of classes per task, valid for the class_iid and class settings")
+    parser.add_argument('--n_class', type=int, default=2, help="Number of classes per task, valid for the class_iid and class_instance settings")
     parser.add_argument('--n_instance', type=int, default=80, help="Number of instances to assign to each class, valid for the instance setting") #8 sessions per obj; 5 objs; 2 classes per incremental task; thus 80 instances (note - actually SESSIONS) per task
     parser.add_argument('--sample_rate', type=int, default=20, help="Sample an image every x frames")
     parser.add_argument('--test_sess', nargs="+", default=[3, 7, 10], type=int, help="Which sessions to use for testing")
@@ -551,7 +557,7 @@ def main():
     classes_per_dataset = []
     count = 0
     for dset_class_count in args.classes_per_dataset:
-        classes_per_dataset.append(list(range(count, count+dset_class_count)))
+        classes_per_dataset.append(list(range(count+1, count+dset_class_count+1)))
         count += dset_class_count
     args.classes_per_dataset = classes_per_dataset
     
