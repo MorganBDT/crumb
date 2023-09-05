@@ -4,6 +4,10 @@
 
 python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_iid --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19       --offline
 python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_instance --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19  --offline
+python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_iid_transfer --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19      --classes_per_dataset 10 14 --offline
+python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_instance_transfer --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19 --classes_per_dataset 10 14 --offline
 
 python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_iid --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19
 python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_instance --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19
+python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_iid_transfer --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19 --classes_per_dataset 10 14
+python dataloaders/task_setup.py --dataset core50+ilab2mlight --scenario class_instance_transfer --task_size_iid 0 --n_instance 336 --test_sess 3 7 10 15 19 --classes_per_dataset 10 14
