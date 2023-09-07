@@ -1,0 +1,48 @@
+# Example usage:
+# ./scripts/ablation/crumb_stream_1run_per_pt.sh core50 0 imagenet_pretrain_3-30-2022 everyperm
+
+DATASET="${1:-"core50"}"
+GPU="${2:-0}"
+MEMORY_SIZE="${3:-200}"
+SUFFIX="${4:-"stock_pretrain_image_replay_memcap_${MEMORY_SIZE}"}"
+LR=${5:-0.001}
+OUTDIR="${DATASET}_${SUFFIX}"
+
+if [ "$DATASET" = "core50" ]; then
+    #DATAROOT="./data/core50"
+    DATAROOT="/media/data/Datasets/Core50"
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "toybox" ]; then
+    #DATAROOT="./data/toybox/images"
+    DATAROOT="/media/data/morgan_data/toybox/images"
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "ilab2mlight" ]; then
+    #DATAROOT="./data/iLab-2M-Light/train_img_distributed"
+    DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "cifar100" ]; then
+    #DATAROOT="./data/cifar100"
+    DATAROOT="/media/data/morgan_data/cifar100"
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "imagenet" ]; then
+    #DATAROOT="/n/groups/kreiman/shared_data/Imagenet2012"
+    DATAROOT="/media/KLAB37/datasets/ImageNet2012"
+    BATCH_SIZE=128
+    N_EPOCH_FIRST_TASK=15
+else
+    echo "Invalid dataset name!"
+    exit
+fi
+
+RUNS=(0 1 2 3 4)
+for RUN in "${RUNS[@]}"; do
+    mkdir -p "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"
+    mkdir -p "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"
+
+    python -u experiment_aug.py --scenario class_iid      --storage_type image --save_model_every_epoch --specific_runs $RUN --n_epoch_first_task $N_EPOCH_FIRST_TASK --n_epoch 1 --replay_times 1 --replay_coef 5 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size $BATCH_SIZE --n_workers 8 --lr "$LR" --memory_size "$MEMORY_SIZE" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"/log.log
+    python -u experiment_aug.py --scenario class_instance --storage_type image --save_model_every_epoch --specific_runs $RUN --n_epoch_first_task $N_EPOCH_FIRST_TASK --n_epoch 1 --replay_times 1 --replay_coef 5 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size $BATCH_SIZE --n_workers 8 --lr "$LR" --memory_size "$MEMORY_SIZE" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"/log.log
+done
