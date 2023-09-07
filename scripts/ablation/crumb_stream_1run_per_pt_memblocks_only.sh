@@ -4,7 +4,7 @@
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
 PRETRAIN_DIR="${3:-"imagenet_pretrain_distmatch_sparse"}"
-SUFFIX="${4:-"unablated"}"
+SUFFIX="${4:-"pt_memblocks_only"}"
 PRETRAIN_N_CLASSES="${5:-1000}"
 N_MEMBLOCKS="${6:-256}"
 MEMBLOCK_LENGTH="${7:-8}"
