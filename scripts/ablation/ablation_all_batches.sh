@@ -50,6 +50,6 @@ RUNS=(0 1 2 3 4)
 for scenario in "${SCENARIOS[@]}"; do
   for run in "${RUNS[@]}"; do
     weights_path=$OUTDIR/$scenario/Crumb_"$model_name"/runs-"$run"/CRUMB_run"$run"
-    python -u ablation_batch_accuracy.py --scenario $scenario --visualize --specific_runs $run --N_MEMBLOCKS $N_MEMBLOCKS --MEMBLOCK_LENGTH $MEMBLOCK_LENGTH --crumb_cut_layer $cut_layer --model_type squeezenet --model_name $model_name --pretrained --agent_type crumb --agent_name Crumb --batch_size 100 --n_workers 0 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --pretrained_dataset_no_of_classes "$NCLASS" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/$scenario/Crumb_"$model_name"/runs-"$run"/batch_acc_log.log
+    python -u ablation_batch_accuracy.py --scenario $scenario --visualize --specific_runs $run --n_memblocks $N_MEMBLOCKS --memblock_length $MEMBLOCK_LENGTH --crumb_cut_layer $cut_layer --model_type squeezenet --model_name $model_name --pretrained --agent_type crumb --agent_name Crumb --batch_size 100 --n_workers 0 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --pretrained_dataset_no_of_classes "$NCLASS" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/$scenario/Crumb_"$model_name"/runs-"$run"/batch_acc_log.log
   done
 done
