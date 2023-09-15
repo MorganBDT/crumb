@@ -31,6 +31,9 @@ args = get_args(sys.argv[1:])
 if not os.path.exists("./bin"):
     os.makedirs("./bin")
 
+if not os.path.exists("./plots"):
+    os.makedirs("./plots")
+
 if args.dest_dir is not None and not os.path.exists(args.dest_dir):
     os.makedirs(args.dest_dir)
 
