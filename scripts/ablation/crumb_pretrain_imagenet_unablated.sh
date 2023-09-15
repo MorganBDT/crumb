@@ -10,7 +10,7 @@ N_MEMBLOCKS=${5:-256}
 MEMBLOCK_LENGTH=${6:-8}
 memory_size=${7:-0} # Meaningless in pretraining (all replay operations skipped)
 RUNS_STR=$(echo "${RUN}" | sed 's/ /-/g') # If "RUN" is formatted like "0 1 2", replace spaces with dashes
-OUTDIR="${DATASET}_pretrain_unablated_batchsampleinit_run${RUNS_STR}"
+OUTDIR="${DATASET}_pretrain_unablated_run${RUNS_STR}"
 if [ "$DATASET" = "core50" ]; then
     DDATAROOT="/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50"
 elif [ "$DATASET" = "toybox" ]; then
@@ -20,7 +20,7 @@ elif [ "$DATASET" = "ilab2mlight" ]; then
 elif [ "$DATASET" = "cifar100" ]; then
     DDATAROOT="/home/rushikesh/P1_Oct/cifar100/cifar100png"
 elif [ "$DATASET" = "imagenet" ]; then
-    DDATAROOT="/media/data/Datasets/ImageNet2012"
+    DDATAROOT="/n/groups/kreiman/shared_data/Imagenet2012"
 else
     echo "Invalid dataset name!"
     exit
