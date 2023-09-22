@@ -71,8 +71,8 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
 
         # # Reindex ilab classes to start counting from 11 instead of 1, to allow the 10 CORe50 classes to be separate
         # ilab2mlight_dirmap["class"] = ilab2mlight_dirmap["class"] + 10
-        # Reindex core50 classes to start counting from 15 instead of 1, to allow the 10 CORe50 classes to be separate
-        core50_dirmap["class"] = core50_dirmap["class"] + 14
+        # Reindex core50 classes to start counting from 16 instead of 1, to allow the 10 CORe50 classes to be separate
+        core50_dirmap["class"] = core50_dirmap["class"] + 15
 
         ## APPEND DIRECTORY NAMES
         if o2:
