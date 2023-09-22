@@ -69,16 +69,10 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         # This allows 11 core50 sessions to be separate.
         ilab2mlight_dirmap["session"] = ilab2mlight_dirmap["session"] + 11
 
-        print("ilab unique classes:")
-        print(ilab2mlight_dirmap["class"].unique())
-
         # # Reindex ilab classes to start counting from 11 instead of 1, to allow the 10 CORe50 classes to be separate
         # ilab2mlight_dirmap["class"] = ilab2mlight_dirmap["class"] + 10
         # Reindex core50 classes to start counting from 16 instead of 1, to allow the 10 CORe50 classes to be separate
         core50_dirmap["class"] = core50_dirmap["class"] + 15
-
-        print("core50 unique classes:")
-        print(core50_dirmap["class"].unique())
 
         ## APPEND DIRECTORY NAMES
         if o2:
