@@ -69,10 +69,16 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         # This allows 11 core50 sessions to be separate.
         ilab2mlight_dirmap["session"] = ilab2mlight_dirmap["session"] + 11
 
+        print("ilab unique classes:")
+        print(ilab2mlight_dirmap["class"].unique())
+
         # # Reindex ilab classes to start counting from 11 instead of 1, to allow the 10 CORe50 classes to be separate
         # ilab2mlight_dirmap["class"] = ilab2mlight_dirmap["class"] + 10
         # Reindex core50 classes to start counting from 16 instead of 1, to allow the 10 CORe50 classes to be separate
         core50_dirmap["class"] = core50_dirmap["class"] + 15
+
+        print("core50 unique classes:")
+        print(core50_dirmap["class"].unique())
 
         ## APPEND DIRECTORY NAMES
         if o2:
@@ -130,6 +136,8 @@ def class_shuffle_dataset_transfer(classes_by_dataset):
     class_ids_shuffled = []
     for dataset_classes in copy.deepcopy(classes_by_dataset):
         np.random.shuffle(dataset_classes)
+        if len(dataset_classes) % 2 != 0:
+            dataset_classes.pop()  # Remove last class if there is an odd number
         class_ids_shuffled.extend(list(dataset_classes))
     return np.array([int(x) for x in class_ids_shuffled], dtype=np.int64)
 
