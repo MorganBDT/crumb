@@ -14,7 +14,7 @@ elif [ "$DATASET" = "ilab2mlight" ]; then
     #DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light"
     DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
     MEMORY_SIZE=15
-elif [ "$DATASET" = "core50+ilab2mlight" ]; then
+elif [ "$DATASET" = "ilab2mlight+core50" ]; then
     DATAROOT="/media/data/Datasets"
     MEMORY_SIZE=30
 else

@@ -46,7 +46,7 @@ elif [ "$DATASET" = "imagenet" ]; then
     MEMORY_SIZE=278342
     BATCH_SIZE=128
     N_RUNS=5
-elif [ "$DATASET" = "core50+ilab2mlight" ]; then
+elif [ "$DATASET" = "ilab2mlight+core50" ]; then
     #DDATAROOT="./data/iLab-2M-Light/train_img_distributed"
     DDATAROOT="/media/data/Datasets"
     MEMORY_SIZE=834
@@ -60,7 +60,7 @@ fi
 DATAROOT=${10:-${DDATAROOT}}
 
 mkdir -p "$OUTDIR"/class_iid/Crumb_SqueezeNet/
-if [ "$DATASET" = "core50" ] || [ "$DATASET" = "toybox" ] || [ "$DATASET" = "ilab2mlight" ] || [ "$DATASET" = "core50+ilab2mlight" ]; then
+if [ "$DATASET" = "core50" ] || [ "$DATASET" = "toybox" ] || [ "$DATASET" = "ilab2mlight" ] || [ "$DATASET" = "ilab2mlight+core50" ]; then
   mkdir -p "$OUTDIR"/class_instance/Crumb_SqueezeNet/
 fi
 

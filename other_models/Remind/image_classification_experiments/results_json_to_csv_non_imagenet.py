@@ -38,11 +38,11 @@ elif dataset == "ilab2mlight":
 elif dataset == "cifar100":
     num_classes = 100
     num_tasks = 20
-elif dataset == "core50+ilab2mlight":
+elif dataset == "ilab2mlight+core50":
     num_classes = 24
     num_tasks = 12
 else:
-    raise ValueError("Dataset must be one of core50, toybox, ilab2mlight, cifar100, or core50+ilab2mlight")
+    raise ValueError("Dataset must be one of core50, toybox, ilab2mlight, cifar100, or ilab2mlight+core50")
 
 top1_test_all_direct_all_runs_list = []
 top1_test_1st_direct_all_runs_list = []

@@ -40,7 +40,7 @@ def sample_frames_core50(examples, sample_rate=20, first_frame=10, max_frames=No
 def train_test_split(dataset, outdir, test_sess, o2=False):
 
     # get directory map of dataset (core50, toybox, etc)
-    if '+' not in dataset: # if not a combined dataset, like core50+ilab2mlight
+    if '+' not in dataset: # if not a combined dataset, like ilab2mlight+core50
         dirmap = pd.read_csv(os.path.join(outdir, dataset + '_dirmap.csv'))
     else:
         dirmap = None
@@ -57,7 +57,7 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         examples = dirmap
     elif dataset == 'cifar100' or dataset == 'imagenet' or dataset == 'imagenet900':
         examples = dirmap
-    elif dataset == 'core50+ilab2mlight':
+    elif dataset == 'ilab2mlight+core50':
         core50_dirmap = sample_frames_core50(pd.read_csv(os.path.join(outdir, 'core50_dirmap.csv')))
         ilab2mlight_dirmap = pd.read_csv(os.path.join(outdir, 'ilab2mlight_dirmap.csv'))
 
@@ -82,7 +82,7 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         ilab2mlight_dirmap['im_path'] = ilab2mlight_dir + "/" + ilab2mlight_dirmap['im_path'].astype(str)
         core50_dirmap['im_path'] = core50_dir + "/" + core50_dirmap['im_path'].astype(str)
 
-        combined_dirmap = pd.concat([core50_dirmap, ilab2mlight_dirmap], ignore_index=True)
+        combined_dirmap = pd.concat([ilab2mlight_dirmap, core50_dirmap], ignore_index=True)
 
         train_combined = combined_dirmap[~combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
         test_combined = combined_dirmap[combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
@@ -93,7 +93,7 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         for idx, combined_split in enumerate([train_combined, test_combined]):
             # Calculate the number of rows to sample for each class
             sample_size = combined_split['class'].value_counts().min()
-            print("Min # examples per class in " + ["train", "test"][idx] + " set of core50+ilab2mlight: ", sample_size)
+            print("Min # examples per class in " + ["train", "test"][idx] + " set of ilab2mlight+core50: ", sample_size)
 
             # Create an empty DataFrame to store the balanced data
             balanced_dirmap = combined_dirmap.iloc[:0].copy()
@@ -551,7 +551,7 @@ def get_args(argv):
     parser.add_argument('--test_sess', nargs="+", default=[3, 7, 10], type=int, help="Which sessions to use for testing")
     parser.add_argument('--offline', default=False, action='store_true', dest='offline')
     parser.add_argument('--o2', default=False, action='store_true', dest='o2', help="If formulating combined datasets for o2 cluster, use this flag")
-    parser.add_argument('--classes_per_dataset', type=int, nargs='+', default=[10, 14], help="Number of classes in each dataset (e.g., for core50+ilab2mlight")
+    parser.add_argument('--classes_per_dataset', type=int, nargs='+', default=[10, 14], help="Number of classes in each dataset (e.g., for ilab2mlight+core50")
 
     # directories
     parser.add_argument('--root', type=str, default='dataloaders', help="Directory that contains the data")

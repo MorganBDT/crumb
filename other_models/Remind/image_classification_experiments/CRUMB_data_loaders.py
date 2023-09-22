@@ -19,7 +19,7 @@ def get_data_loader(split, min_class, max_class, args=None, return_item_ix=False
                 dataroot=args.images_dir, filelist_root=args.filelist_root, scenario=args.scenario,
                 offline=args.offline, run=args.run, batch=args.task, transform=train_transforms,
                 returnIndex=return_item_ix)
-        elif args.dataset in ['toybox', 'ilab2mlight', 'cifar100', 'core50+ilab2mlight']:
+        elif args.dataset in ['toybox', 'ilab2mlight', 'cifar100', 'ilab2mlight+core50']:
             train_data = datasets.Generic_Dataset(
                 dataroot=args.images_dir, dataset=args.dataset, filelist_root=args.filelist_root,
                 scenario=args.scenario,
@@ -44,7 +44,7 @@ def get_data_loader(split, min_class, max_class, args=None, return_item_ix=False
             test_data = datasets.CORE50(
                 dataroot=args.images_dir, filelist_root=args.filelist_root, scenario=args.scenario,
                 offline=args.offline, run=args.run, train=False, transform=test_transforms, returnIndex=return_item_ix)
-        elif args.dataset in ['toybox', 'ilab2mlight', 'cifar100', 'core50+ilab2mlight']:
+        elif args.dataset in ['toybox', 'ilab2mlight', 'cifar100', 'ilab2mlight+core50']:
             # get test data
             test_data = datasets.Generic_Dataset(
                 dataroot=args.images_dir, dataset=args.dataset, filelist_root=args.filelist_root,
