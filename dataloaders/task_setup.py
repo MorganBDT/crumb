@@ -132,6 +132,28 @@ def class_shuffle_dataset_transfer(classes_by_dataset):
     return np.array([int(x) for x in class_ids_shuffled], dtype=np.int64)
 
 
+def class_shuffle_dataset_pairs(classes_by_dataset):
+    """
+    classes_by_dataset: a list of lists, each list contains the class ids in one dataset.
+    Shuffles the classes such that each sequential pair is from the same dataset,
+    but overall, the pairs are shuffled across different datasets.
+    """
+    # Shuffle classes within each dataset and form pairs
+    pairs = []
+    for dataset_classes in classes_by_dataset:
+        np.random.shuffle(dataset_classes)
+        for i in range(0, len(dataset_classes), 2):  # Assume the number of classes in each dataset is even
+            pairs.append((dataset_classes[i], dataset_classes[i + 1]))
+
+    # Shuffle the resulting pairs
+    np.random.shuffle(pairs)
+
+    # Flatten the list of pairs to create a final list of class IDs
+    class_ids_shuffled = [class_id for pair in pairs for class_id in pair]
+
+    return np.array(class_ids_shuffled, dtype=np.int64)
+
+
 # setup files containing image paths/labels for each task in the iid scenario
 def iid_task_setup(dataset='core50', n_runs = 10, task_size = 1200, sample_rate = 20, test_sess = [3,7,10], offline = False, outdir = 'dataloaders', o2=False):
     
@@ -222,7 +244,7 @@ def iid_task_filelist(train, test, run, task_size, offline, outdir, dataset='cor
         train_task['task'] = b
         
         # appending task to train_final
-        train_final = train_final.append(train_task)    
+        train_final = pd.concat([train_final, train_task])
      
     # defining labels based on order of appearance of classes
     classes = train_final['class'].unique()
@@ -261,11 +283,13 @@ def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset=
     # shuffling the list of classes
     shuffled_classes = train['class'].unique()
     if classes_per_dataset is None:
+        print("Shuffling the order of all classes randomly")
         np.random.shuffle(shuffled_classes)
-    elif setting == "class_iid_transfer":
+    elif "+" in dataset:
+        print("Shuffling classes with dataset shift")
         shuffled_classes = class_shuffle_dataset_transfer(classes_per_dataset)
     else:
-        raise ValueError("Error: what setting is being used, class_iid or class_iid_transfer?")
+        raise ValueError("Error: what setting is being used, class_iid or class_iid with dataset transfer?")
     
     # number of tasks
     n_task = math.ceil(len(shuffled_classes) / n_class)
@@ -292,7 +316,7 @@ def class_iid_task_filelist(train, test, run, n_class, offline, outdir, dataset=
         train_task['task'] = b
         
         # appending task to train_final
-        train_final = train_final.append(train_task)
+        train_final = pd.concat([train_final, train_task])
         
     # defining labels based on order of appearance of classes
     classes = train_final['class'].unique()
@@ -383,10 +407,10 @@ def instance_task_filelist(train, test, run, n_instance, sample_rate, offline, o
             inst_task['task'] = b
             
             # append to examples for that task
-            train_task = train_task.append(inst_task)
+            train_task = pd.concat([train_task, inst_task])
             
         # append to train_final
-        train_final = train_final.append(train_task)
+        train_final = pd.concat([train_final, train_task])
     
     # defining labels based on order of appearance of classes
     classes = train_final['class'].unique()
@@ -427,11 +451,13 @@ def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dat
     # shuffling the list of classes
     shuffled_classes = train['class'].unique()
     if classes_per_dataset is None:
+        print("Shuffling the order of all classes randomly")
         np.random.shuffle(shuffled_classes)
-    elif setting == "class_instance_transfer":
+    elif "+" in dataset:
+        print("Shuffling classes with dataset shift")
         shuffled_classes = class_shuffle_dataset_transfer(classes_per_dataset)
     else:
-        raise ValueError("Error: what setting is being used, class_instance or class_instance_transfer?")
+        raise ValueError("Error: what setting is being used, class_instance or class_instance with dataset transfer?")
     
     # number of tasks
     n_task = math.ceil(len(shuffled_classes) / n_class)
@@ -470,10 +496,10 @@ def class_instance_task_filelist(train, test, run, n_class, offline, outdir, dat
             inst_task['task'] = b
             
             # append to examples for that task
-            train_task = train_task.append(inst_task)
+            train_task = pd.concat([train_task, inst_task])
         
         # appending task
-        train_final = train_final.append(train_task)
+        train_final = pd.concat([train_final, train_task])
         
     # defining labels based on order of appearance of classes
     classes = train_final['class'].unique()
@@ -501,19 +527,13 @@ def write_task_filelists(args):
         iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, task_size = args.task_size_iid, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
         
     elif args.scenario == 'class_iid':
-        class_iid_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
+        class_iid_task_setup(dataset=args.dataset, classes_per_dataset=args.classes_per_dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
     
     elif args.scenario == 'instance':
         instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_instance = args.n_instance, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
         
     elif args.scenario == 'class_instance':
-        class_instance_task_setup(dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
-
-    elif args.scenario == 'class_iid_transfer':
-        class_iid_task_setup(setting=args.scenario, classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
-
-    elif args.scenario == 'class_instance_transfer':
-        class_instance_task_setup(setting=args.scenario, classes_per_dataset=args.classes_per_dataset, dataset=args.dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
+        class_instance_task_setup(dataset=args.dataset, classes_per_dataset=args.classes_per_dataset, n_runs = args.n_runs, n_class = args.n_class, sample_rate = args.sample_rate, test_sess = args.test_sess, offline = args.offline, outdir = args.root, o2=args.o2)
 
 def get_args(argv):
     
@@ -550,8 +570,8 @@ def main():
     args.root = os.path.join(os.getcwd(), args.root)
     
     # ensure that a valid scenario has been passed
-    if args.scenario not in ['iid', 'class_iid', 'instance', 'class_instance', 'class_iid_transfer', 'class_instance_transfer']:
-        print('Invalid scenario passed, must be one of: iid, class_iid, instance, class_instance, class_iid_transfer, class_instance_transfer')
+    if args.scenario not in ['iid', 'class_iid', 'instance', 'class_instance']:
+        print('Invalid scenario passed, must be one of: iid, class_iid, instance, class_instance')
         return
 
     classes_per_dataset = []
