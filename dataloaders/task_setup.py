@@ -55,7 +55,7 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
     elif dataset == 'ilab2mlight':
         # ilab2mlight pre-sampled in ilab2mlight_sample.py due to the complexity of this dataset's structure
         examples = dirmap
-    elif dataset == 'cifar100' or dataset == 'imagenet' or dataset == 'imagenet900':
+    elif dataset == 'cifar100' or dataset == 'imagenet' or dataset == 'imagenet900' or dataset == 'icubworldtransf':
         examples = dirmap
     elif dataset == 'ilab2mlight+core50':
         core50_dirmap = sample_frames_core50(pd.read_csv(os.path.join(outdir, 'core50_dirmap.csv')))
@@ -555,7 +555,7 @@ def get_args(argv):
     parser.add_argument('--test_sess', nargs="+", default=[3, 7, 10], type=int, help="Which sessions to use for testing")
     parser.add_argument('--offline', default=False, action='store_true', dest='offline')
     parser.add_argument('--o2', default=False, action='store_true', dest='o2', help="If formulating combined datasets for o2 cluster, use this flag")
-    parser.add_argument('--classes_per_dataset', type=int, nargs='+', default=[10, 14], help="Number of classes in each dataset (e.g., for ilab2mlight+core50")
+    parser.add_argument('--classes_per_dataset', type=int, nargs='+', default=None, help="Number of classes in each dataset (e.g., for ilab2mlight+core50")
 
     # directories
     parser.add_argument('--root', type=str, default='dataloaders', help="Directory that contains the data")
@@ -578,12 +578,13 @@ def main():
         print('Invalid scenario passed, must be one of: iid, class_iid, instance, class_instance')
         return
 
-    classes_per_dataset = []
-    count = 0
-    for dset_class_count in args.classes_per_dataset:
-        classes_per_dataset.append(list(range(count+1, count+dset_class_count+1)))
-        count += dset_class_count
-    args.classes_per_dataset = classes_per_dataset
+    if args.classes_per_dataset is not None:
+        classes_per_dataset = []
+        count = 0
+        for dset_class_count in args.classes_per_dataset:
+            classes_per_dataset.append(list(range(count+1, count+dset_class_count+1)))
+            count += dset_class_count
+        args.classes_per_dataset = classes_per_dataset
     
     write_task_filelists(args)
     

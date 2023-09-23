@@ -9,6 +9,8 @@ def get_args(argv):
 
     parser.add_argument('--dataset_root', type=str, default="/media/KLAB37/datasets/icubworldtransf")
     parser.add_argument('--n_instances', type=int, default=10)
+    parser.add_argument('--every_k_frames', type=int, default=10,
+                        help="Sample every k frames. Footage is at 10 fps, so a value of 10 means 1 fps.")
     parser.add_argument('--cam', type=str, default="left", help="Use the 'left' or 'right' cam images")
 
     return parser.parse_args(argv)
@@ -41,7 +43,7 @@ for class_ind, class_name in enumerate(list(class_dict.keys())):
             session_path = os.path.join(session_path, day_dir, args.cam)
             ims = sorted([im for im in os.listdir(os.path.join(args.dataset_root, session_path)) if ".jpg" in im])
             df_list = []
-            for im_ind, im in enumerate(ims):
+            for im_ind, im in enumerate(ims[::args.every_k_frames]):
                 row = {
                     "class": class_ind,
                     "object": instance_ind,
