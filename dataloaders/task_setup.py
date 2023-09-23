@@ -89,27 +89,41 @@ def train_test_split(dataset, outdir, test_sess, o2=False):
         train_combined = combined_dirmap[~combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
         test_combined = combined_dirmap[combined_dirmap.session.isin(test_sess)].reset_index(drop=True)
 
-        ## Resample to get equal number of images per class (only in training set - keep all test images).
-
+        # Resample to get equal number of images per class.
+        # We are taking care to sample not by just randomly selecting images, but by randomly selecting a subsample
+        # of object-session combinations, so that we still have contiguous video clips for class_instance.
         balanced_splits = []
         for idx, combined_split in enumerate([train_combined, test_combined]):
-            # Calculate the number of rows to sample for each class
-            sample_size = combined_split['class'].value_counts().min()
-            print("Min # examples per class in " + ["train", "test"][idx] + " set of ilab2mlight+core50: ", sample_size)
+            # Create a new column 'object_session' combining 'object' and 'session' columns
+            combined_split['object_session'] = combined_split['object'].astype(str) + "_" + combined_split['session'].astype(str)
+
+            # Find the minimum number of unique 'object_session' combinations available among all classes
+            sample_size = combined_split.groupby('class')['object_session'].nunique().min()
+            print("Min # unique object_session per class in " + ["train", "test"][idx] + " set of ilab2mlight+core50: ", sample_size)
 
             # Create an empty DataFrame to store the balanced data
-            balanced_dirmap = combined_dirmap.iloc[:0].copy()
+            balanced_dirmap = combined_split.iloc[:0].copy()
 
             # Iterate through each unique class value
             for class_value in combined_split['class'].unique():
-                # Sample the required number of rows for this class
-                sampled_rows = combined_split[combined_split['class'] == class_value].sample(sample_size, replace=False, random_state=0)
+                # Get all unique 'object_session' combinations for this class
+                combined_split_class = combined_split[combined_split['class'] == class_value]
+                unique_combinations = combined_split_class['object_session'].unique()
 
-                # Append the sampled rows to the balanced DataFrame
+                # Randomly sample the required number of 'object_session' combinations
+                sampled_combinations = pd.Series(unique_combinations).sample(sample_size, replace=False, random_state=int(class_value))
+
+                # Get all rows with the sampled 'object_session' combinations and append them to the balanced DataFrame
+                sampled_rows = combined_split_class[combined_split_class['object_session'].isin(sampled_combinations)]
                 balanced_dirmap = pd.concat([balanced_dirmap, sampled_rows])
 
+            # Drop the 'object_session' column as it's no longer needed
+            balanced_dirmap = balanced_dirmap.drop(columns=['object_session'])
+            print("Number of images per class in the final balanced dataset (" + {0: "train", 1: "test"}[idx] + "):")
+            print(balanced_dirmap['class'].value_counts())
             balanced_splits.append(balanced_dirmap)
 
+        # Concatenate balanced splits and sort
         balanced_all = pd.concat(balanced_splits, ignore_index=True)
         balanced_all = balanced_all.sort_values(by=["class", "object", "session", "im_num"], ignore_index=True)
 
@@ -360,7 +374,7 @@ def instance_task_filelist(train, test, run, n_instance, sample_rate, offline, o
     np.random.seed(run)
     
     # getting unique instances of objects
-    instances = np.unique(train[['object', 'session']].values, axis = 0)
+    instances = np.unique(train[['class', 'object', 'session']].values, axis = 0)
     
     # shuffling
     np.random.shuffle(instances)
