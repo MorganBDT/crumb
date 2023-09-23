@@ -34,6 +34,11 @@ elif [ "$DATASET" = "ilab2mlight+core50" ]; then
     BASE_MAX_CLASS=2
     NUM_CLASSES=24
     MAX_BUFFER_SIZE=834
+elif [ "$DATASET" = "icubworldtransf" ]; then
+    DATAROOT="/n/groups/kreiman/shared_data/icubworldtransf_sparse"
+    BASE_MAX_CLASS=2
+    NUM_CLASSES=20
+    MAX_BUFFER_SIZE=834
 else
     echo "Invalid dataset name!"
     exit

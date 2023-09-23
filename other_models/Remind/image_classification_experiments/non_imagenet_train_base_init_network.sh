@@ -29,6 +29,10 @@ elif [ "$DATASET" = "ilab2mlight+core50" ]; then
     DATAROOT="/n/groups/kreiman/shared_data"
     BASE_MAX_CLASS=2
     NUM_CLASSES=24
+elif [ "$DATASET" = "icubworldtransf" ]; then
+    DATAROOT="/n/groups/kreiman/shared_data/icubworldtransf_sparse"
+    BASE_MAX_CLASS=2
+    NUM_CLASSES=20
 else
     echo "Invalid dataset name!"
     exit

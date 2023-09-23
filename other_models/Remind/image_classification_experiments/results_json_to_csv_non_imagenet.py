@@ -41,6 +41,9 @@ elif dataset == "cifar100":
 elif dataset == "ilab2mlight+core50":
     num_classes = 24
     num_tasks = 12
+elif dataset == "icubworldtransf":
+    num_classes = 20
+    num_tasks = 10
 else:
     raise ValueError("Dataset must be one of core50, toybox, ilab2mlight, cifar100, or ilab2mlight+core50")
 
