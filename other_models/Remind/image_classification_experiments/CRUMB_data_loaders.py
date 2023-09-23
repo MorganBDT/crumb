@@ -8,8 +8,7 @@ def get_data_loader(split, min_class, max_class, args=None, return_item_ix=False
 
     if split == 'train':
         train_transforms = transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize([224, 224]),
             transforms.ToTensor(),
             normalize,
         ])
@@ -34,7 +33,7 @@ def get_data_loader(split, min_class, max_class, args=None, return_item_ix=False
 
     elif split == 'val':
         test_transforms = transforms.Compose([
-            transforms.Resize(224),
+            transforms.Resize([224, 224]),
             # transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
