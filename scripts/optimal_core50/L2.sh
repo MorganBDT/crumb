@@ -13,6 +13,8 @@ elif [ "$DATASET" = "ilab2mlight" ]; then
     DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
 elif [ "$DATASET" = "ilab2mlight+core50" ]; then
     DATAROOT="/media/data/Datasets"
+elif [ "$DATASET" = "icubworldtransf" ]; then
+    DATAROOT="/media/KLAB37/datasets/icubworldtransf_sparse"
 else
     echo "Invalid dataset name!"
     exit
