@@ -48,7 +48,7 @@ class Trainer:
             self.dataset = cifar100(paradigm, run)
         elif dataset == "ilab2mlight+core50":
             self.dataset = Ilabpluscore50(paradigm, run)
-        elif dataset == "icubworldtransf:":
+        elif dataset == "icubworldtransf":
             self.dataset = Icub(paradigm, run)
         else:
             raise ValueError("Must specify a valid dataset. \"" + str(dataset) + "\" is not valid")
