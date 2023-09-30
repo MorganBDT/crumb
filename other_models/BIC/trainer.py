@@ -36,6 +36,7 @@ class Trainer:
         self.total_cls = total_cls
         self.seen_cls = 0
         #self.dataset = Cifar100()
+        self.dataset_name = dataset
         if dataset == "core50":
             self.dataset = Core50(paradigm, run)
         elif dataset == 'toybox':
@@ -357,11 +358,11 @@ class Trainer:
             if inc_i > 0 :
                 epoches = 1 #stream learning; see data only once
 
-            train_data = DataLoader(BatchData(train_xs, train_ys, self.input_transform),
+            train_data = DataLoader(BatchData(train_xs, train_ys, self.input_transform, dataset=self.dataset_name),
                         batch_size=batch_size, shuffle=True, drop_last=True)
-            val_data = DataLoader(BatchData(val_x, val_y, self.input_transform_eval),
+            val_data = DataLoader(BatchData(val_x, val_y, self.input_transform_eval, dataset=self.dataset_name),
                         batch_size=batch_size, shuffle=False)            
-            test_data = DataLoader(BatchData(test_xs, test_ys, self.input_transform_eval),
+            test_data = DataLoader(BatchData(test_xs, test_ys, self.input_transform_eval, dataset=self.dataset_name),
                         batch_size=batch_size, shuffle=False)
             optimizer = optim.SGD(self.model.parameters(), lr=lr, momentum=0.9,  weight_decay=2e-4)
             # scheduler = LambdaLR(optimizer, lr_lambda=adjust_cifar100)
@@ -377,7 +378,7 @@ class Trainer:
             self.seen_cls = exemplar.get_cur_cls()
             print("seen cls number : ", self.seen_cls)
             val_xs, val_ys = exemplar.get_exemplar_val()
-            val_bias_data = DataLoader(BatchData(val_xs, val_ys, self.input_transform),
+            val_bias_data = DataLoader(BatchData(val_xs, val_ys, self.input_transform, dataset=self.dataset_name),
                         batch_size=1, shuffle=True, drop_last=False)
             test_acc = []
             first_task_test_res = []
