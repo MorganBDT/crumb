@@ -30,7 +30,7 @@ class Ilabpluscore50:
                
         self.test_data = []
         self.test_labels = []
-        self.test_groups = [[],[],[],[],[]]
+        self.test_groups = [[]]*12
         groupsid = {'0':0,'1':0,
                     '2':1,'3':1,
                     '4':2,'5':2,
