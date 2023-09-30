@@ -10,18 +10,25 @@ import torch
 from torchvision.datasets.folder import pil_loader
 
 class BatchData(Dataset):
-    def __init__(self, images, labels, input_transform=None):
+    def __init__(self, images, labels, input_transform=None, dataset=None):
         self.images = images
         self.labels = labels
         self.input_transform = input_transform
-        # if self.dataset == 'ilab':
-        #     self.dataroot = '/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed' 
-        # if self.dataset == 'toybox':
-        #     self.dataroot = '/media/data/morgan_data/toybox/images' 
-        # if self.dataset == 'core50':
-        #     self.dataroot = '/media/data/Datasets/Core50/core50_128x128' #'/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50/core50_128x128/'
-        #if self.dataset == 'cifar100':
-        self.dataroot = '/home/rushikesh/P1_Oct/cifar100/cifar100png'
+        if dataset == 'ilab':
+            self.dataroot = '/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed'
+        elif dataset == 'toybox':
+            self.dataroot = '/media/data/morgan_data/toybox/images'
+        elif dataset == 'core50':
+            self.dataroot = '/media/data/Datasets/Core50/core50_128x128'
+        elif dataset == 'cifar100':
+            self.dataroot = '/media/data/morgan_data/cifar100'
+        elif dataset == 'ilab2mlight+core50':
+            self.dataroot = '/media/data/Datasets'
+        elif dataset == 'icubworldtransf':
+            self.dataroot = '/media/KLAB37/datasets/icubworldtransf_sparse'
+        else:
+            raise ValueError("Must specify a valid dataset. \"" + str(dataset) + "\" is not valid")
+        #self.dataroot = '/home/rushikesh/P1_Oct/cifar100/cifar100png'
         #self.dataroot = './core50/core50_128x128/'
 
     def __getitem__(self, index):

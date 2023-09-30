@@ -25,6 +25,8 @@ from core50 import Core50
 from toybox import Toybox
 from ilab import Ilab
 from cifar100 import cifar100
+from ilabpluscore50 import Ilabpluscore50
+from icub import Icub
 from exemplar import Exemplar
 from copy import deepcopy
 
@@ -36,14 +38,21 @@ class Trainer:
         #self.dataset = Cifar100()
         if dataset == "core50":
             self.dataset = Core50(paradigm, run)
-        if dataset == 'toybox':
+        elif dataset == 'toybox':
             self.dataset = Toybox(paradigm, run)
-        if dataset == "ilab":
+        elif dataset == "ilab":
             print("in ilab data")
             self.dataset = Ilab(paradigm, run)
-        if dataset == "cifar100":
+        elif dataset == "cifar100":
             print("in cifar100 data")
             self.dataset = cifar100(paradigm, run)
+        elif dataset == "ilab2mlight+core50":
+            self.dataset = Ilabpluscore50(paradigm, run)
+        elif dataset == "icubworldtransf:":
+            self.dataset = Icub(paradigm, run)
+        else:
+            raise ValueError("Must specify a valid dataset. \"" + str(dataset) + "\" is not valid")
+
         
         print("total_cls is")
         print(total_cls)

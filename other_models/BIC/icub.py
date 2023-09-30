@@ -2,12 +2,12 @@ import pickle
 import numpy as np
 import os
 
-class Core50:
+class Icub:
     def __init__(self, paradigm, run):
         
         self.batch_num = 5
         #self.rootdir = '/home/mengmi/Projects/Proj_CL_NTM/pytorch/core50/dataloaders/task_filelists/'
-        self.rootdir = './../../dataloaders/core50_task_filelists/'
+        self.rootdir = './../../dataloaders/icubworldtransf_task_filelists/'
         #self.rootdir = '/media/rushikesh/New Volume/Harvard_thesis/continual_learning/code/BIC/BIC/core50/dataloaders/core50_task_filelists/'#/class_iid/run0/stream/train_task_00_filelist.txt'
         
         self.train_data = []
@@ -23,7 +23,7 @@ class Core50:
                         self.train_data.append(path)
                         self.train_labels.append(int(label))
         self.train = {'data': self.train_data,'fine_labels': self.train_labels}
-        print("this is train self.train in core50")
+        print("this is train self.train in icubworldtransf")
         print(len(self.train))
 
         self.val_groups = self.train_groups.copy()        
@@ -35,7 +35,12 @@ class Core50:
                     '2':1,'3':1,
                     '4':2,'5':2,
                     '6':3,'7':3,
-                    '8':4,'9':4}
+                    '8':4,'9':4,
+                    '10':5,'11':5,
+                    '12':6,'13':6,
+                    '14':7,'15':7,
+                    '16':8,'17':8,
+                    '18':9,'19':9}
         with open( self.rootdir + paradigm + '/run' + str(run) + '/stream/test_filelist.txt','r') as f:
                 for i, line in enumerate(f):
                     if line.strip():
@@ -51,5 +56,5 @@ class Core50:
         return self.train_groups[i], self.val_groups[i], self.test_groups[i]
 
 if __name__ == "__main__":
-    cifar = Core50(paradigm = 'class_iid', run = 0)
-    print(len(cifar.train_groups[0]))
+    dset = Icub(paradigm = 'class_iid', run = 0)
+    print(len(dset.train_groups[0]))
