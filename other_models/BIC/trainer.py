@@ -480,10 +480,19 @@ class Trainer:
         # Consolidated version
         assert self.total_cls % self.n_tasks == 0
         classes_per_task = int(self.total_cls / self.n_tasks)
-        ins_by_task = [input[c:c+classes_per_task] for c in range(0, self.total_cls, classes_per_task)]
-        assert(len(ins_by_task) == len(self.bias_layers))
-        outs = [self.bias_layers[b](b_in) for b, b_in in enumerate(ins_by_task)]
-        return torch.cat(outs, dim=1)
+        inputs = [input[:, i * classes_per_task: (i + 1) * classes_per_task] for i in range(self.total_cls // classes_per_task)]
+
+        outputs = [self.bias_layers[i](inputs[i]) for i in range(len(inputs))]
+
+        return torch.cat(outputs[:self.total_cls // classes_per_task], dim=1)
+
+
+        # assert self.total_cls % self.n_tasks == 0
+        # classes_per_task = int(self.total_cls / self.n_tasks)
+        # ins_by_task = [input[c:c+classes_per_task] for c in range(0, self.total_cls, classes_per_task)]
+        # assert(len(ins_by_task) == len(self.bias_layers))
+        # outs = [self.bias_layers[b](b_in) for b, b_in in enumerate(ins_by_task)]
+        # return torch.cat(outs, dim=1)
 
         # in1 = input[:, :5]
         # in1 = input[:, :5]
