@@ -13,6 +13,9 @@ class Exemplar:
         print(self.cur_cls)
         print(len(list(self.val.keys())))
         print(len(list(self.train.keys())))
+        print(self.cur_cls == len(list(self.val.keys())))
+        print(type(self.cur_cls))
+        print(type(len(list(self.val.keys()))))
         assert self.cur_cls == len(list(self.val.keys()))
         assert self.cur_cls == len(list(self.train.keys()))
 
