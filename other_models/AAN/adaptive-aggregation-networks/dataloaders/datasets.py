@@ -60,14 +60,14 @@ class CORE50(data.Dataset):
         of Dataset objects (one for each incremental training batch and one for
         the test set).
     """
-    
+
     filenames = {
         '128x128': 'core50_128x128.zip',
         '350x350': 'core50_350x350.zip',
         'filelists': 'task_filelists.zip'
     }
 
-    def __init__(self, dataroot, filelist_root = 'dataloaders', scenario='iid', offline = False, train=True,
+    def __init__(self, dataroot, filelist_root='dataloaders', scenario='iid', offline=False, train=True,
                  img_size='128x128', run=0, batch=0, transform=None,
                  target_transform=None):
 
@@ -89,21 +89,21 @@ class CORE50(data.Dataset):
             if offline:
                 self.fpath = os.path.join(
                     self.scenario, 'run' + str(run), 'offline',
-                    'train_task_' + str(batch).zfill(2) + '_filelist.txt'
+                                   'train_task_' + str(batch).zfill(2) + '_filelist.txt'
                 )
             else:
                 self.fpath = os.path.join(
                     self.scenario, 'run' + str(run), 'stream',
-                    'train_task_' + str(batch).zfill(2) + '_filelist.txt'
-                    )
+                                   'train_task_' + str(batch).zfill(2) + '_filelist.txt'
+                )
         else:
             # it's the last one, hence the test batch
             if offline:
                 self.fpath = os.path.join(
-                self.scenario, 'run' + str(run), 'offline',
-                'test_filelist.txt'
+                    self.scenario, 'run' + str(run), 'offline',
+                    'test_filelist.txt'
                 )
-                
+
             else:
                 self.fpath = os.path.join(
                     self.scenario, 'run' + str(run), 'stream',
@@ -114,7 +114,7 @@ class CORE50(data.Dataset):
         # [:-4] is to remove the .zip extension from the filename
         # path = os.path.join(self.root, self.filenames['filelists'][:-4], self.fpath)
         path = os.path.join(self.filelist_root, 'core50_task_filelists', self.fpath)
-        
+
         # loading all the labels and image paths
         with open(path, 'r') as f:
             for i, line in enumerate(f):
@@ -133,7 +133,7 @@ class CORE50(data.Dataset):
 
         fpath = self.img_paths[index]
         target = self.labels[index]
-        
+
         img = pil_loader(
             os.path.join(self.dataroot, self.filenames[self.img_size][:-4], fpath)
         )
@@ -153,7 +153,8 @@ class CORE50(data.Dataset):
 
 class Generic_Dataset(data.Dataset):
 
-    def __init__(self, dataroot, dataset="toybox", filelist_root='dataloaders', scenario='iid', offline=False, train=True,
+    def __init__(self, dataroot, dataset="toybox", filelist_root='dataloaders', scenario='iid', offline=False,
+                 train=True,
                  run=0, batch=0, transform=None,
                  target_transform=None):
 
@@ -169,7 +170,6 @@ class Generic_Dataset(data.Dataset):
         self.fpath = None
         self.img_paths = []
         self.labels = []
-        self.data = []
 
         if train:
             if offline:
@@ -208,14 +208,6 @@ class Generic_Dataset(data.Dataset):
                     path, label = line.split()
                     self.labels.append(int(label))
                     self.img_paths.append(path)
-                    img = pil_loader(
-                        os.path.join(self.dataroot, path)
-                    )
-                    if self.transform is not None:
-                        img = self.transform(img).unsqueeze(0)
-                    self.data.append(img)
-
-        
 
     def __getitem__(self, index):
         """
@@ -243,10 +235,41 @@ class Generic_Dataset(data.Dataset):
     def __len__(self):
 
         return len(self.labels)
-            
-            
+
+
+class CORE50_vis(CORE50):
+
+    def __init__(self, dataroot, filelist_root='dataloaders', scenario='iid', offline=False, train=True,
+                 img_size='128x128', run=0, batch=0, transform=None,
+                 target_transform=None):
+        super().__init__(dataroot, filelist_root=filelist_root, scenario=scenario, offline=offline, train=train,
+                         img_size=img_size, run=run, batch=batch, transform=transform,
+                         target_transform=target_transform)
+
+    def __getitem__(self, index):
+        """
+        Args:
+            index (int): Index
+        Returns:
+            tuple: (image, target) where target is index of the target class.
+        """
+
+        fpath = self.img_paths[index]
+        target = self.labels[index]
+
+        img_path = os.path.join(self.dataroot, self.filenames[self.img_size][:-4], fpath)
+        img = pil_loader(img_path)
+
+        if self.transform is not None:
+            img = self.transform(img)
+
+        if self.target_transform is not None:
+            target = self.target_transform(target)
+
+        return img, target, img_path
+
+
 class ImageNet(data.Dataset):
-    
+
     def __init__(self, data):
-        
         self.dataset = data

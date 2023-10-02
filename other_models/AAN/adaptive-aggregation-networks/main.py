@@ -19,7 +19,7 @@ if __name__ == '__main__':
 
     ### Basic parameters
     parser.add_argument('--gpu', default='0', help='the index of GPU')
-    parser.add_argument('--dataset', default='cifar100', type=str, choices=['cifar100', 'imagenet_sub', 'imagenet','core50','ilab2mlight','toybox'])
+    parser.add_argument('--dataset', default='cifar100', type=str, choices=['cifar100', 'imagenet_sub', 'imagenet', 'core50', 'ilab2mlight', 'toybox', 'icubworldtransf', 'ilab2mlight+core50'])
     
     parser.add_argument('--scenario', default='class_iid', type=str, choices=['class_iid', 'class_instance'])
     parser.add_argument('--dataroot', default='/home/mengmi/Projects/Proj_CL_NTM/cvpr22/cifar100', type=str)

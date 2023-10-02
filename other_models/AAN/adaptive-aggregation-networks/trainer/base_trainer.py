@@ -94,14 +94,13 @@ class BaseTrainer(object):
 
     def set_dataset_variables(self):
         """The function to set the dataset parameters."""
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # Set CIFAR-100
             # Set the pre-processing steps for training set
-            self.transform_train = transforms.Compose([transforms.Resize([32, 32]),transforms.RandomCrop(32, padding=4), \
-                transforms.RandomHorizontalFlip(), transforms.ToTensor(), \
+            self.transform_train = transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor(), \
                 transforms.Normalize((0.5071,  0.4866,  0.4409), (0.2009,  0.1984,  0.2023)),])
             # Set the pre-processing steps for test set
-            self.transform_test = transforms.Compose([transforms.ToTensor(), transforms.Resize([32, 32]), \
+            self.transform_test = transforms.Compose([transforms.ToTensor(), transforms.Resize([224, 224]), \
                 transforms.Normalize((0.5071,  0.4866,  0.4409), (0.2009,  0.1984,  0.2023)),])
             # Initial the dataloader
             self.trainset = torchvision.datasets.CIFAR100(root='./data', train=True, download=True, transform=self.transform_train)
@@ -117,8 +116,14 @@ class BaseTrainer(object):
             # Set the dictionary size
             if self.args.dataset == 'cifar100':
                 self.dictionary_size = 500
-            elif self.args.dataset == 'core50':
-                self.dictionary_size = 600 
+            elif self.args.dataset in ['core50', 'ilab2mlight+core50']:
+                self.dictionary_size = 600
+            elif self.args.dataset == 'icubworldtransf':
+                self.dictionary_size = 1200
+            elif self.args_dataset == 'toybox':
+                self.dictionary_size = 4350
+            elif self.args_dataset == 'ilab2mlight':
+                self.dictionary_size = 3360
             else:
                 raise ValueError('Dictionary size not specified')
                 
@@ -175,7 +180,7 @@ class BaseTrainer(object):
           X_valid_total: an array that contains all validation samples
           Y_valid_total: an array that contains all validation labels 
         """
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
 #             X_train_total = np.array(self.trainset.data)
 #             Y_train_total = np.array(self.trainset.targets)
 #             X_valid_total = np.array(self.testset.data)
@@ -219,7 +224,7 @@ class BaseTrainer(object):
     def init_fusion_vars(self):
         """The function to initialize the aggregation weights."""
         self.fusion_vars = nn.ParameterList()
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # CIFAR-100, the number of blocks: 3
             if self.args.branch_mode == 'dual':
                 # Dual branch mode, intialize the aggregation weights to 0.5
@@ -295,7 +300,7 @@ class BaseTrainer(object):
         """
         # Set an empty to store the indexes for the selected exemplars
         alpha_dr_herding  = np.zeros((int(self.args.num_classes/self.args.nb_cl), dictionary_size, self.args.nb_cl), np.float32)
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # CIFAR-100, directly load the tensors for the training samples
             print(X_train_total.shape)
             prototypes = np.zeros((self.args.num_classes, dictionary_size, X_train_total.shape[1], X_train_total.shape[2], X_train_total.shape[3]))
@@ -516,7 +521,7 @@ class BaseTrainer(object):
         Returns:
           b1_model: the 1st branch model from the current phase, the FC classifier is updated
         """
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # Load previous FC weights, transfer them from GPU to CPU
             old_embedding_norm = b1_model.fc.fc1.weight.data.norm(dim=1, keepdim=True)
             average_old_embedding_norm = torch.mean(old_embedding_norm, dim=0).to('cpu').type(torch.DoubleTensor)
@@ -599,7 +604,7 @@ class BaseTrainer(object):
           testloader: the test dataloader
         """
         print('Setting the dataloaders ...')
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # Set the training dataloader
             self.trainset.data = X_train.astype('uint8')
             self.trainset.targets = map_Y_train
@@ -739,7 +744,7 @@ class BaseTrainer(object):
         Return:
           balancedloader: the balanced dataloader for the exemplars
         """
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             # Load the training samples for the current phase
             X_train_this_step = X_train_total[indices_train_10]
             Y_train_this_step = Y_train_total[indices_train_10]
@@ -810,7 +815,7 @@ class BaseTrainer(object):
         map_Y_valid_ori = np.array([order_list.index(i) for i in Y_valid_ori])
         print('Computing accuracy on the 0-th phase classes...')
         # Set a temporary dataloader for the 0-th phase data
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             self.evalset.data = X_valid_ori.astype('uint8')
             self.evalset.targets = map_Y_valid_ori
             pin_memory = False
@@ -835,7 +840,7 @@ class BaseTrainer(object):
         map_Y_valid_cumul = np.array([order_list.index(i) for i in Y_valid_cumul])
         # Set a temporary dataloader for the current-phase data
         print('Computing cumulative accuracy...')
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             self.evalset.data = X_valid_cumul.astype('uint8')
             self.evalset.targets = map_Y_valid_cumul
         elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':  
@@ -886,7 +891,7 @@ class BaseTrainer(object):
         tg_feature_model = nn.Sequential(*list(b1_model.children())[:-1])
         # Get the shape for the feature maps
         num_features = b1_model.fc.in_features
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             for iter_dico in range(last_iter*self.args.nb_cl, (iteration+1)*self.args.nb_cl):
                 # Set a temporary dataloader for the current class
                 self.evalset.data = prototypes[iter_dico].astype('uint8')
@@ -950,7 +955,7 @@ class BaseTrainer(object):
         # Set two empty lists for the exemplars and the labels 
         X_protoset_cumuls = []
         Y_protoset_cumuls = []
-        if self.args.dataset == 'cifar100' or self.args.dataset == 'toybox' or self.args.dataset == 'core50' or self.args.dataset == 'ilab2mlight':
+        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "imagenet", "imagenet900", "ilab2mlight+core50", "icubworldtransf"]:
             class_means = np.zeros((64,100,2))
             for iteration2 in range(iteration+1):
                 for iter_dico in range(self.args.nb_cl):
