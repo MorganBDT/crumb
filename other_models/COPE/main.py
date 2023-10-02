@@ -293,7 +293,7 @@ def _eval_tasks(model, tasks, current_task, args):
     total_avg_acc = total_pred / total_size
 
     print("EVAL (train TASK {}/test total) ===> {}".format(current_task, total_result_seq))
-    #torch.save((model.state_dict(), task_result_seq, task_avg_acc), model.fname + '.pt')
+    torch.save((model.state_dict(), task_result_seq, task_avg_acc), model.fname + '.pt')
 
     return total_result_seq, total_avg_acc, task_result_seq, task_avg_acc
 
@@ -528,7 +528,7 @@ def main(overwrite_args=None):
         print(model.fname + ': ' + one_liner + ' # ' + str(spent_time))
 
         # save all results in binary file
-        #torch.save((*res.get_all(), model.state_dict(), stats, one_liner, args), model.fname + '.pt')
+        torch.save((*res.get_all(), model.state_dict(), stats, one_liner, args), model.fname + '.pt')
         stat_files.append(model.fname + '.pt')
 
     mean, std = stat_summarize(stat_files)
