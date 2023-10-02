@@ -123,7 +123,7 @@ class BaseTrainer(object):
             if self.args.dataset == 'cifar100':
                 self.dictionary_size = 500
             elif self.args.dataset in ['core50', 'ilab2mlight+core50']:
-                self.dictionary_size = 420
+                self.dictionary_size = 600
             elif self.args.dataset == 'icubworldtransf':
                 self.dictionary_size = 598
             elif self.args_dataset == 'toybox':
