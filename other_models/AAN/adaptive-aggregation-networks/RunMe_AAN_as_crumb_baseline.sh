@@ -5,7 +5,7 @@ DATASET="${1:-"core50"}"
 GPU_ID="${2:-0}"
 
 if [ "$DATASET" = "core50" ]; then
-    DATAROOT="/media/data/Datasets/Core50"
+    DATAROOT="/media/data/Datasets/Core50/core50_128x128"
     PARADIGMS=("class_iid" "class_instance")
     RUNS=(0 1 2 3 4 5 6 7 8 9)
     NUM_CLASSES=10
