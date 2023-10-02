@@ -32,7 +32,10 @@ if __name__ == "__main__":
         first_task_test_res_final_all.append(first_task_test_res_final)
         
     # writing testing accuracy to csv
-    #test_df_1st.to_csv(os.path.join(total_path,'test_task1.csv'), index = False, header = False)    
+
+    os.makedirs('output', exist_ok=True)
+    #test_df_1st.to_csv(os.path.join(total_path,'test_task1.csv'), index = False, header = False)
+
     test_df = pd.DataFrame(test_accs_all)
     print("testing accuracies")
     print(test_df)
