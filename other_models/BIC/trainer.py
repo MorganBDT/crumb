@@ -486,14 +486,6 @@ class Trainer:
 
         return torch.cat(outputs[:self.total_cls // classes_per_task], dim=1)
 
-
-        # assert self.total_cls % self.n_tasks == 0
-        # classes_per_task = int(self.total_cls / self.n_tasks)
-        # ins_by_task = [input[c:c+classes_per_task] for c in range(0, self.total_cls, classes_per_task)]
-        # assert(len(ins_by_task) == len(self.bias_layers))
-        # outs = [self.bias_layers[b](b_in) for b, b_in in enumerate(ins_by_task)]
-        # return torch.cat(outs, dim=1)
-
         # in1 = input[:, :5]
         # in1 = input[:, :5]
         # in2 = input[:, 5:10]
@@ -611,9 +603,6 @@ class Trainer:
             label = label.view(-1).cuda()
             p = self.model(image)
             p = self.bias_forward(p)
-            print("PRINTING SIZES:")
-            print(p.size())
-            print(label.size())
             loss = criterion(p[:,:self.seen_cls], label)
             optimizer.zero_grad()
             loss.backward()
