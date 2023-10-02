@@ -35,22 +35,27 @@ class Trainer:
     def __init__(self, total_cls, paradigm, run,dataset):
         self.total_cls = total_cls
         self.seen_cls = 0
-        #self.dataset = Cifar100()
         self.dataset_name = dataset
         if dataset == "core50":
             self.dataset = Core50(paradigm, run)
+            self.n_tasks = total_cls / 2
         elif dataset == 'toybox':
             self.dataset = Toybox(paradigm, run)
+            self.n_tasks = total_cls / 2
         elif dataset == "ilab":
             print("in ilab data")
             self.dataset = Ilab(paradigm, run)
+            self.n_tasks = total_cls / 2
         elif dataset == "cifar100":
             print("in cifar100 data")
             self.dataset = cifar100(paradigm, run)
+            self.n_tasks = total_cls / 5
         elif dataset == "ilab2mlight+core50":
             self.dataset = Ilabpluscore50(paradigm, run)
+            self.n_tasks = total_cls / 2
         elif dataset == "icubworldtransf":
             self.dataset = Icub(paradigm, run)
+            self.n_tasks = total_cls / 2
         else:
             raise ValueError("Must specify a valid dataset. \"" + str(dataset) + "\" is not valid")
 
@@ -60,46 +65,50 @@ class Trainer:
         self.model = PreResNet(32,total_cls).cuda()
         print(self.model)
         self.model = nn.DataParallel(self.model, device_ids=[0])
-        self.bias_layer1 = BiasLayer().cuda()
-        self.bias_layer2 = BiasLayer().cuda()
-        self.bias_layer3 = BiasLayer().cuda()
-        self.bias_layer4 = BiasLayer().cuda()
-        self.bias_layer5 = BiasLayer().cuda()
-        # if self.total_cls == 10:
-        #     self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5]
 
-        if self.total_cls == 12:
-            self.bias_layer6 = BiasLayer().cuda()
-            self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6]
+        # Consolidated version
+        self.bias_layers = [BiasLayer().cuda() for _ in range(self.n_tasks)]
 
-        if self.total_cls == 14:
-            print("for ilab data")
-            self.bias_layer6 = BiasLayer().cuda()
-            self.bias_layer7 = BiasLayer().cuda()
-            self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6, self.bias_layer7]
-            
-        if self.total_cls == 100:
-            print("for ilab data")
-            self.bias_layer6 = BiasLayer().cuda()
-            self.bias_layer7 = BiasLayer().cuda()
-            self.bias_layer8 = BiasLayer().cuda()
-            self.bias_layer9 = BiasLayer().cuda()
-            self.bias_layer10 = BiasLayer().cuda()
-            self.bias_layer11 = BiasLayer().cuda()
-            self.bias_layer12 = BiasLayer().cuda()
-            self.bias_layer13 = BiasLayer().cuda()
-            self.bias_layer14 = BiasLayer().cuda()
-            self.bias_layer15 = BiasLayer().cuda()
-            self.bias_layer16 = BiasLayer().cuda()
-            self.bias_layer17 = BiasLayer().cuda()
-            self.bias_layer18 = BiasLayer().cuda()
-            self.bias_layer19 = BiasLayer().cuda()
-            self.bias_layer20 = BiasLayer().cuda()
-
-            self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6, self.bias_layer7,
-                                self.bias_layer8,self.bias_layer9,self.bias_layer10,self.bias_layer11,self.bias_layer12,self.bias_layer13,self.bias_layer14,
-                                self.bias_layer15,self.bias_layer16,self.bias_layer17,self.bias_layer18,self.bias_layer19,self.bias_layer20]
-            
+        # self.bias_layer1 = BiasLayer().cuda()
+        # self.bias_layer2 = BiasLayer().cuda()
+        # self.bias_layer3 = BiasLayer().cuda()
+        # self.bias_layer4 = BiasLayer().cuda()
+        # self.bias_layer5 = BiasLayer().cuda()
+        # # if self.total_cls == 10:
+        # #     self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5]
+        #
+        # if self.total_cls == 12:
+        #     self.bias_layer6 = BiasLayer().cuda()
+        #     self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6]
+        #
+        # if self.total_cls == 14:
+        #     print("for ilab data")
+        #     self.bias_layer6 = BiasLayer().cuda()
+        #     self.bias_layer7 = BiasLayer().cuda()
+        #     self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6, self.bias_layer7]
+        #
+        # if self.total_cls == 100:
+        #     print("for ilab data")
+        #     self.bias_layer6 = BiasLayer().cuda()
+        #     self.bias_layer7 = BiasLayer().cuda()
+        #     self.bias_layer8 = BiasLayer().cuda()
+        #     self.bias_layer9 = BiasLayer().cuda()
+        #     self.bias_layer10 = BiasLayer().cuda()
+        #     self.bias_layer11 = BiasLayer().cuda()
+        #     self.bias_layer12 = BiasLayer().cuda()
+        #     self.bias_layer13 = BiasLayer().cuda()
+        #     self.bias_layer14 = BiasLayer().cuda()
+        #     self.bias_layer15 = BiasLayer().cuda()
+        #     self.bias_layer16 = BiasLayer().cuda()
+        #     self.bias_layer17 = BiasLayer().cuda()
+        #     self.bias_layer18 = BiasLayer().cuda()
+        #     self.bias_layer19 = BiasLayer().cuda()
+        #     self.bias_layer20 = BiasLayer().cuda()
+        #
+        #     self.bias_layers=[self.bias_layer1, self.bias_layer2, self.bias_layer3, self.bias_layer4, self.bias_layer5,self.bias_layer6, self.bias_layer7,
+        #                         self.bias_layer8,self.bias_layer9,self.bias_layer10,self.bias_layer11,self.bias_layer12,self.bias_layer13,self.bias_layer14,
+        #                         self.bias_layer15,self.bias_layer16,self.bias_layer17,self.bias_layer18,self.bias_layer19,self.bias_layer20]
+        #
         self.input_transform= Compose([
                                 transforms.Resize(32),
                                 transforms.RandomHorizontalFlip(),
@@ -114,187 +123,231 @@ class Trainer:
         total_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
         print("Solver total trainable parameters : ", total_params)
 
-
-
     def test(self, testdata):
-        print("test data number : ",len(testdata))
+        print("Test data number : ", len(testdata))
         self.model.eval()
-        count = 0
+
+        classes_per_task = self.total_cls / self.n_tasks
+
+        task_correct = [0] * self.n_tasks  # Stores correct predictions for each task
+        task_sum = [0] * self.n_tasks  # Stores total instances for each task
+
         correct = 0
-        wrong = 0
-        task1 = 0
-        task2 = 0
-        task3 = 0
-        task4 = 0
-        task5 = 0
-        task6 = 0
-        task7 = 0
-        task8,task9,task10,task11,task12,task13,task14 = 0,0,0,0,0,0,0
-        task15,task16,task17,task18,task19,task20 = 0,0,0,0,0,0
-        sum1 = 0
-        sum2 = 0
-        sum3 = 0
-        sum4 = 0
-        sum5 = 0
-        sum6 = 0
-        sum7 = 0
-        sum8,sum9,sum10,sum11,sum12,sum13,sum14 = 0,0,0,0,0,0,0
-        sum15,sum16,sum17,sum18,sum19,sum20 = 0,0,0,0,0,0
+        total = 0
 
+        for image, labels in testdata:
+            image, labels = image.cuda(), labels.view(-1).cuda()
 
-        for i, (image, label) in enumerate(testdata):
-            image = image.cuda()
-            label = label.view(-1).cuda()
-            p = self.model(image)
-            p = self.bias_forward(p)
-            pred = p[:,:self.seen_cls].argmax(dim=-1)
-            correct += sum(pred == label).item()
-            wrong += sum(pred != label).item()
-            for a,b in zip(label,pred):
-                if a == b:
-                    if a >= 0 and a <= 4:
-                        task1 += 1
-                    elif a >= 5 and a <= 9:
-                        task2 += 1
-                    elif a >= 10 and a <= 14:
-                        task3 += 1
-                    elif a >= 15 and a <= 19:
-                        task4 += 1
-                    elif a >= 20 and a <= 24:
-                        task5 += 1
-                    elif a >= 25 and a <= 29:
-                        task6 += 1
-                    elif a >= 30 and a <= 34:
-                        task7 += 1
-                    elif a >= 35 and a <= 39:
-                        task8 += 1
-                    elif a >= 40 and a <= 44:
-                        task9 += 1
-                    elif a >= 45 and a <= 49:
-                        task10 += 1
-                    elif a >= 50 and a <= 54:
-                        task11 += 1
-                    elif a >= 55 and a <= 59:
-                        task12 += 1
-                    elif a >= 60 and a <= 64:
-                        task13 += 1
-                    elif a >= 65 and a <= 69:
-                        task14 += 1
-                    elif a >= 70 and a <= 74:
-                        task15 += 1
-                    elif a >= 75 and a <= 79:
-                        task16 += 1
-                    elif a >= 80 and a <= 84:
-                        task17 += 1
-                    elif a >= 85 and a <= 89:
-                        task18 += 1
-                    elif a >= 90 and a <= 94:
-                        task19 += 1
-                    elif a >= 95 and a <= 99:
-                        task20 += 1
+            p = self.bias_forward(self.model(image))
+            preds = p[:, :self.seen_cls].argmax(dim=-1)
 
-                if a >= 0 and a <= 4:
-                    sum1 += 1
-                elif a >= 5 and a <= 9:
-                    sum2 += 1
-                elif a >= 10 and a <= 14:
-                    sum3 += 1
-                elif a >= 15 and a <= 19:
-                    sum4 += 1
-                elif a >= 20 and a <= 24:
-                    sum5 += 1
-                elif a >= 25 and a <= 29:
-                    sum6 += 1
-                elif a >= 30 and a <= 34:
-                    sum7 += 1
-                elif a >= 35 and a <= 39:
-                    sum8 += 1
-                elif a >= 40 and a <= 44:
-                    sum9 += 1
-                elif a >= 45 and a <= 49:
-                    sum10 += 1
-                elif a >= 50 and a <= 54:
-                    sum11 += 1
-                elif a >= 55 and a <= 59:
-                    sum12 += 1
-                elif a >= 60 and a <= 64:
-                    sum13 += 1
-                elif a >= 65 and a <= 69:
-                    sum14 += 1
-                elif a >= 70 and a <= 74:
-                    sum15 += 1
-                elif a >= 75 and a <= 79:
-                    sum16 += 1
-                elif a >= 80 and a <= 84:
-                    sum17 += 1
-                elif a >= 85 and a <= 89:
-                    sum18 += 1
-                elif a >= 90 and a <= 94:
-                    sum19 += 1
-                elif a >= 95 and a <= 99:
-                    sum20 += 1
-    
+            correct += (preds == labels).sum().item()
+            total += len(labels)
 
-        # print("pred and label")
-        # print(pred,label)
+            for true_label, predicted_label in zip(labels, preds):
+                task_idx = true_label // classes_per_task
+                task_sum[task_idx] += 1
+                if true_label == predicted_label:
+                    task_correct[task_idx] += 1
 
-        acc = correct / (wrong + correct)
-        print("Test Acc: {}".format(acc*100))
-        # print("task wise")
-        # print(task1, task2, task3, task4, task5,task6, task7)
-        # print("task wise sum")
-        # print(sum1, sum2, sum3, sum4,sum5, sum6, sum7) 
+        overall_acc = correct / total if total > 0 else 0
+        print("Test Acc: {:.2f}%".format(overall_acc * 100))
+
         print("Task wise accuracies:")
-        if sum1 != 0:
-            #task1_res.append(float(task1 / sum1))
-            acc_1sttask = task1 / sum1
-            print("task 1:",task1 / sum1)
-        if sum2 != 0:
-            print("task 2:",task2 / sum2)
-        if sum3 != 0:
-            print("task 3:",task3 / sum3)
-        if sum4 != 0:
-            print("task 4:",task4 / sum4)
-        if sum5 != 0:
-            print("task 5:",task5 / sum5)
-        if sum6 != 0:
-            print("task 6:",task6 / sum6)
-        if sum7 != 0:
-            print("task 7:",task7 / sum7)
-        if sum8 != 0:
-            print("task 8:",task8 / sum8)
-        if sum9 != 0:
-            print("task 9:",task9 / sum9)
-        if sum10 != 0:
-            print("task 10:",task10 / sum10)
-        if sum11 != 0:
-            print("task 11:",task11 / sum11)
-        if sum12 != 0:
-            print("task 12:",task12 / sum12)
-        if sum13 != 0:
-            print("task 13:",task13 / sum13)
-        if sum14 != 0:
-            print("task 14:",task14 / sum14)
-        if sum15 != 0:
-            print("task 15:",task15 / sum15)
-        if sum16 != 0:
-            print("task 16:",task16 / sum16)
-        if sum17 != 0:
-            print("task 17:",task17 / sum17)
-        if sum18 != 0:
-            print("task 18:",task18 / sum18)
-        if sum19 != 0:
-            print("task 19:",task19 / sum19)
-        if sum20 != 0:
-            print("task 20:",task20 / sum20)
+        task_accuracies = []
+        for i in range(self.n_tasks):
+            if task_sum[i] == 0:
+                task_acc = 0
+            else:
+                task_acc = task_correct[i] / task_sum[i]
+            task_accuracies.append(task_acc)
+            print(f"Task {i + 1}: {task_acc:.2f}")
 
-        # print("correct")
-        # print(correct)
-        # print("wrong + correct")
-        # print(wrong + correct)
+        acc_1sttask = task_accuracies[0] if self.n_tasks > 0 else 0
+
         self.model.train()
         print("---------------------------------------------")
-        return acc,acc_1sttask
+        return overall_acc, acc_1sttask
+
+    # def test(self, testdata):
+    #     print("test data number : ",len(testdata))
+    #     self.model.eval()
+    #     count = 0
+    #     correct = 0
+    #     wrong = 0
+    #     task1 = 0
+    #     task2 = 0
+    #     task3 = 0
+    #     task4 = 0
+    #     task5 = 0
+    #     task6 = 0
+    #     task7 = 0
+    #     task8,task9,task10,task11,task12,task13,task14 = 0,0,0,0,0,0,0
+    #     task15,task16,task17,task18,task19,task20 = 0,0,0,0,0,0
+    #     sum1 = 0
+    #     sum2 = 0
+    #     sum3 = 0
+    #     sum4 = 0
+    #     sum5 = 0
+    #     sum6 = 0
+    #     sum7 = 0
+    #     sum8,sum9,sum10,sum11,sum12,sum13,sum14 = 0,0,0,0,0,0,0
+    #     sum15,sum16,sum17,sum18,sum19,sum20 = 0,0,0,0,0,0
+    #
+    #
+    #     for i, (image, label) in enumerate(testdata):
+    #         image = image.cuda()
+    #         label = label.view(-1).cuda()
+    #         p = self.model(image)
+    #         p = self.bias_forward(p)
+    #         pred = p[:,:self.seen_cls].argmax(dim=-1)
+    #         correct += sum(pred == label).item()
+    #         wrong += sum(pred != label).item()
+    #         for a,b in zip(label,pred):
+    #             if a == b:
+    #                 if a >= 0 and a <= 4:
+    #                     task1 += 1
+    #                 elif a >= 5 and a <= 9:
+    #                     task2 += 1
+    #                 elif a >= 10 and a <= 14:
+    #                     task3 += 1
+    #                 elif a >= 15 and a <= 19:
+    #                     task4 += 1
+    #                 elif a >= 20 and a <= 24:
+    #                     task5 += 1
+    #                 elif a >= 25 and a <= 29:
+    #                     task6 += 1
+    #                 elif a >= 30 and a <= 34:
+    #                     task7 += 1
+    #                 elif a >= 35 and a <= 39:
+    #                     task8 += 1
+    #                 elif a >= 40 and a <= 44:
+    #                     task9 += 1
+    #                 elif a >= 45 and a <= 49:
+    #                     task10 += 1
+    #                 elif a >= 50 and a <= 54:
+    #                     task11 += 1
+    #                 elif a >= 55 and a <= 59:
+    #                     task12 += 1
+    #                 elif a >= 60 and a <= 64:
+    #                     task13 += 1
+    #                 elif a >= 65 and a <= 69:
+    #                     task14 += 1
+    #                 elif a >= 70 and a <= 74:
+    #                     task15 += 1
+    #                 elif a >= 75 and a <= 79:
+    #                     task16 += 1
+    #                 elif a >= 80 and a <= 84:
+    #                     task17 += 1
+    #                 elif a >= 85 and a <= 89:
+    #                     task18 += 1
+    #                 elif a >= 90 and a <= 94:
+    #                     task19 += 1
+    #                 elif a >= 95 and a <= 99:
+    #                     task20 += 1
+    #
+    #             if a >= 0 and a <= 4:
+    #                 sum1 += 1
+    #             elif a >= 5 and a <= 9:
+    #                 sum2 += 1
+    #             elif a >= 10 and a <= 14:
+    #                 sum3 += 1
+    #             elif a >= 15 and a <= 19:
+    #                 sum4 += 1
+    #             elif a >= 20 and a <= 24:
+    #                 sum5 += 1
+    #             elif a >= 25 and a <= 29:
+    #                 sum6 += 1
+    #             elif a >= 30 and a <= 34:
+    #                 sum7 += 1
+    #             elif a >= 35 and a <= 39:
+    #                 sum8 += 1
+    #             elif a >= 40 and a <= 44:
+    #                 sum9 += 1
+    #             elif a >= 45 and a <= 49:
+    #                 sum10 += 1
+    #             elif a >= 50 and a <= 54:
+    #                 sum11 += 1
+    #             elif a >= 55 and a <= 59:
+    #                 sum12 += 1
+    #             elif a >= 60 and a <= 64:
+    #                 sum13 += 1
+    #             elif a >= 65 and a <= 69:
+    #                 sum14 += 1
+    #             elif a >= 70 and a <= 74:
+    #                 sum15 += 1
+    #             elif a >= 75 and a <= 79:
+    #                 sum16 += 1
+    #             elif a >= 80 and a <= 84:
+    #                 sum17 += 1
+    #             elif a >= 85 and a <= 89:
+    #                 sum18 += 1
+    #             elif a >= 90 and a <= 94:
+    #                 sum19 += 1
+    #             elif a >= 95 and a <= 99:
+    #                 sum20 += 1
+    #
+    #
+    #     # print("pred and label")
+    #     # print(pred,label)
+    #
+    #     acc = correct / (wrong + correct)
+    #     print("Test Acc: {}".format(acc*100))
+    #     # print("task wise")
+    #     # print(task1, task2, task3, task4, task5,task6, task7)
+    #     # print("task wise sum")
+    #     # print(sum1, sum2, sum3, sum4,sum5, sum6, sum7)
+    #     print("Task wise accuracies:")
+    #     if sum1 != 0:
+    #         #task1_res.append(float(task1 / sum1))
+    #         acc_1sttask = task1 / sum1
+    #         print("task 1:",task1 / sum1)
+    #     if sum2 != 0:
+    #         print("task 2:",task2 / sum2)
+    #     if sum3 != 0:
+    #         print("task 3:",task3 / sum3)
+    #     if sum4 != 0:
+    #         print("task 4:",task4 / sum4)
+    #     if sum5 != 0:
+    #         print("task 5:",task5 / sum5)
+    #     if sum6 != 0:
+    #         print("task 6:",task6 / sum6)
+    #     if sum7 != 0:
+    #         print("task 7:",task7 / sum7)
+    #     if sum8 != 0:
+    #         print("task 8:",task8 / sum8)
+    #     if sum9 != 0:
+    #         print("task 9:",task9 / sum9)
+    #     if sum10 != 0:
+    #         print("task 10:",task10 / sum10)
+    #     if sum11 != 0:
+    #         print("task 11:",task11 / sum11)
+    #     if sum12 != 0:
+    #         print("task 12:",task12 / sum12)
+    #     if sum13 != 0:
+    #         print("task 13:",task13 / sum13)
+    #     if sum14 != 0:
+    #         print("task 14:",task14 / sum14)
+    #     if sum15 != 0:
+    #         print("task 15:",task15 / sum15)
+    #     if sum16 != 0:
+    #         print("task 16:",task16 / sum16)
+    #     if sum17 != 0:
+    #         print("task 17:",task17 / sum17)
+    #     if sum18 != 0:
+    #         print("task 18:",task18 / sum18)
+    #     if sum19 != 0:
+    #         print("task 19:",task19 / sum19)
+    #     if sum20 != 0:
+    #         print("task 20:",task20 / sum20)
+    #
+    #     # print("correct")
+    #     # print(correct)
+    #     # print("wrong + correct")
+    #     # print(wrong + correct)
+    #     self.model.train()
+    #     print("---------------------------------------------")
+    #     return acc,acc_1sttask
 
 
     def eval(self, criterion, evaldata):
@@ -424,57 +477,64 @@ class Trainer:
         return test_accs,first_task_test_res_final
 
     def bias_forward(self, input):
-        in1 = input[:, :5]
-        in2 = input[:, 5:10]
-        in3 = input[:, 10:15]
-        in4 = input[:, 15:20]
-        in5 = input[:, 20:25]
-        in6 = input[:, 25:30]
-        in7 = input[:, 30:35]
-        in8 = input[:, 35:40]
-        in9 = input[:, 40:45]
-        in10 = input[:, 45:50]
-        in11 = input[:, 50:55]
-        in12 = input[:, 55:60]
-        in13 = input[:, 60:65]
-        in14 = input[:, 65:70]
-        in15 = input[:, 70:75]
-        in16 = input[:, 75:80]
-        in17 = input[:, 80:85]
-        in18 = input[:, 85:90]
-        in19 = input[:, 90:95]
-        in20 = input[:, 95:100]
-        
-        out1 = self.bias_layer1(in1)
-        out2 = self.bias_layer2(in2)
-        out3 = self.bias_layer3(in3)
-        out4 = self.bias_layer4(in4)
-        out5 = self.bias_layer5(in5)
-        out6,out7,out8,out9 = self.bias_layer6(in6),self.bias_layer7(in7),self.bias_layer8(in8),self.bias_layer9(in9)
-        out10,out11,out12,out13 = self.bias_layer10(in10),self.bias_layer11(in11),self.bias_layer12(in12),self.bias_layer13(in13)
-        out14,out15,out16,out17 = self.bias_layer14(in14),self.bias_layer15(in15),self.bias_layer16(in16),self.bias_layer17(in17)
-        out18,out19,out20 = self.bias_layer18(in18),self.bias_layer19(in19),self.bias_layer20(in20)
-        
-         
-        if self.total_cls == 10:
-           return torch.cat([out1, out2, out3, out4, out5], dim = 1)
-        elif self.total_cls == 12:
-            in6 = input[:, 10:12]
-            out6 = self.bias_layer6(in6)
-            return torch.cat([out1, out2, out3, out4, out5,out6], dim = 1)
-            
-        elif self.total_cls == 14:
-            in6 = input[:, 10:12]
-            out6 = self.bias_layer6(in6)
-            in7 = input[:, 12:14]
-            out7 = self.bias_layer7(in7)
-            return torch.cat([out1, out2, out3, out4, out5,out6,out7], dim = 1)
+        # Consolidated version
+        classes_per_task = self.total_cls / self.n_tasks
+        ins_by_task = [input[c:c+classes_per_task] for c in range(0, self.total_cls, classes_per_task)]
+        assert(len(ins_by_task) == len(self.bias_layers))
+        outs = [self.bias_layers[b](b_in) for b, b_in in enumerate(ins_by_task)]
+        return torch.cat(outs, dim=1)
 
-        if self.total_cls == 100:
-            #print("in total_cls = 100")
-            return torch.cat([out1, out2, out3, out4, out5,
-           out6,out7,out8,out9,out10,out11,out12,out13,
-           out14,out15,out16,out17,out18,out19,out20], dim = 1)
+        # in1 = input[:, :5]
+        # in2 = input[:, 5:10]
+        # in3 = input[:, 10:15]
+        # in4 = input[:, 15:20]
+        # in5 = input[:, 20:25]
+        # in6 = input[:, 25:30]
+        # in7 = input[:, 30:35]
+        # in8 = input[:, 35:40]
+        # in9 = input[:, 40:45]
+        # in10 = input[:, 45:50]
+        # in11 = input[:, 50:55]
+        # in12 = input[:, 55:60]
+        # in13 = input[:, 60:65]
+        # in14 = input[:, 65:70]
+        # in15 = input[:, 70:75]
+        # in16 = input[:, 75:80]
+        # in17 = input[:, 80:85]
+        # in18 = input[:, 85:90]
+        # in19 = input[:, 90:95]
+        # in20 = input[:, 95:100]
+        #
+        # out1 = self.bias_layer1(in1)
+        # out2 = self.bias_layer2(in2)
+        # out3 = self.bias_layer3(in3)
+        # out4 = self.bias_layer4(in4)
+        # out5 = self.bias_layer5(in5)
+        # out6,out7,out8,out9 = self.bias_layer6(in6),self.bias_layer7(in7),self.bias_layer8(in8),self.bias_layer9(in9)
+        # out10,out11,out12,out13 = self.bias_layer10(in10),self.bias_layer11(in11),self.bias_layer12(in12),self.bias_layer13(in13)
+        # out14,out15,out16,out17 = self.bias_layer14(in14),self.bias_layer15(in15),self.bias_layer16(in16),self.bias_layer17(in17)
+        # out18,out19,out20 = self.bias_layer18(in18),self.bias_layer19(in19),self.bias_layer20(in20)
+        #
+        #
+        # if self.total_cls == 10:
+        #    return torch.cat([out1, out2, out3, out4, out5], dim = 1)
+        # elif self.total_cls == 12:
+        #     in6 = input[:, 10:12]
+        #     out6 = self.bias_layer6(in6)
+        #     return torch.cat([out1, out2, out3, out4, out5,out6], dim = 1)
+        #
+        # elif self.total_cls == 14:
+        #     in6 = input[:, 10:12]
+        #     out6 = self.bias_layer6(in6)
+        #     in7 = input[:, 12:14]
+        #     out7 = self.bias_layer7(in7)
+        #     return torch.cat([out1, out2, out3, out4, out5,out6,out7], dim = 1)
+        #
+        # if self.total_cls == 100:
+        #     #print("in total_cls = 100")
+        #     return torch.cat([out1, out2, out3, out4, out5,
+        #    out6,out7,out8,out9,out10,out11,out12,out13,
+        #    out14,out15,out16,out17,out18,out19,out20], dim = 1)
 
         '''elif self.total_cls == 14:
             in6 = input[:, 10:12]
