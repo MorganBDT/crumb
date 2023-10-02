@@ -133,7 +133,7 @@ class Trainer:
         task_sum = [0] * self.n_tasks  # Stores total instances for each task
 
         correct = 0
-        total = 0
+        wrong = 0
 
         for image, labels in testdata:
             image, labels = image.cuda(), labels.view(-1).cuda()
@@ -142,15 +142,14 @@ class Trainer:
             preds = p[:, :self.seen_cls].argmax(dim=-1)
 
             correct += (preds == labels).sum().item()
-            total += len(labels)
-
+            wrong += (preds != labels).sum().item()
             for true_label, predicted_label in zip(labels, preds):
                 task_idx = true_label // classes_per_task
                 task_sum[task_idx] += 1
                 if true_label == predicted_label:
                     task_correct[task_idx] += 1
 
-        overall_acc = correct / total if total > 0 else 0
+        overall_acc = correct / (wrong + correct) if (wrong + correct) > 0 else 0
         print("Test Acc: {:.2f}%".format(overall_acc * 100))
 
         print("Task wise accuracies:")
