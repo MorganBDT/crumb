@@ -46,6 +46,6 @@ fi
 
 for PARADIGM in "${PARADIGMS[@]}"; do
   for RUN in "${RUNS[@]}"; do
-     python main.py --dataset $DATASET --run $RUN --paradigm $PARADIGM --batch_size $BATCH_SIZE --n_memories $MEMORY_SIZE --gpu_id $GPU_ID --data_file "$DATASET".pt
+     python main.py --dataset $DATASET --run $RUN --paradigm $PARADIGM --batch_size $BATCH_SIZE --n_memories $MEMORY_SIZE --gpu_id $GPU_ID --data_file "$DATASET".pt --n_seeds 1
   done
 done
