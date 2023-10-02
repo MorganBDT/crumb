@@ -38,24 +38,24 @@ class Trainer:
         self.dataset_name = dataset
         if dataset == "core50":
             self.dataset = Core50(paradigm, run)
-            self.n_tasks = total_cls / 2
+            self.n_tasks = 10
         elif dataset == 'toybox':
             self.dataset = Toybox(paradigm, run)
-            self.n_tasks = total_cls / 2
+            self.n_tasks = 12
         elif dataset == "ilab":
             print("in ilab data")
             self.dataset = Ilab(paradigm, run)
-            self.n_tasks = total_cls / 2
+            self.n_tasks = 14
         elif dataset == "cifar100":
             print("in cifar100 data")
             self.dataset = cifar100(paradigm, run)
-            self.n_tasks = total_cls / 5
+            self.n_tasks = 20
         elif dataset == "ilab2mlight+core50":
             self.dataset = Ilabpluscore50(paradigm, run)
-            self.n_tasks = total_cls / 2
+            self.n_tasks = 12
         elif dataset == "icubworldtransf":
             self.dataset = Icub(paradigm, run)
-            self.n_tasks = total_cls / 2
+            self.n_tasks = 10
         else:
             raise ValueError("Must specify a valid dataset. \"" + str(dataset) + "\" is not valid")
 
