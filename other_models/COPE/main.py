@@ -471,6 +471,8 @@ def main(overwrite_args=None):
         elif args.input_shape[-1] == 784:  # MNIST
             assert args.is_mnist
             args.CHW = (1, 28, 28)
+        elif args.input_shape[-1] == 49152:
+            args.CHW = (3, 128, 128)  # CORe50, toybox, ilab etc
         else:
             raise NotImplementedError()
 
