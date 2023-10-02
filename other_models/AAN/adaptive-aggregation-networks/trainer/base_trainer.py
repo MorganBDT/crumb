@@ -962,7 +962,7 @@ class BaseTrainer(object):
         X_protoset_cumuls = []
         Y_protoset_cumuls = []
         if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
-            class_means = np.zeros((64,self.args.num_classes,2))
+            class_means = np.zeros((num_features,self.args.num_classes,2))
             for iteration2 in range(iteration+1):
                 for iter_dico in range(self.args.nb_cl):
                     # Compute the D and D2 matrizes, which are used to compute the class mean values
