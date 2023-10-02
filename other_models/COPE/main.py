@@ -474,6 +474,7 @@ def main(overwrite_args=None):
         elif args.input_shape[-1] == 49152:
             args.CHW = (3, 128, 128)  # CORe50, toybox, ilab etc
         else:
+            print("Not implemented for number of pixel values:", args.input_shape[-1])
             raise NotImplementedError()
 
         args.n_classes = n_classes
