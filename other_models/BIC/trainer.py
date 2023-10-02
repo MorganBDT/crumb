@@ -426,7 +426,7 @@ class Trainer:
             bias_optimizer = optim.Adam(self.bias_layers[inc_i].parameters(), lr=0.001)
             # bias_scheduler = StepLR(bias_optimizer, step_size=70, gamma=0.1)
             #exemplar.update(total_cls//dataset.batch_num, (train_x, train_y), (val_x, val_y)) #is this even correct????? #RBZ changes
-            exemplar.update(total_cls//20, (train_x, train_y), (val_x, val_y))
+            exemplar.update(total_cls//self.n_tasks, (train_x, train_y), (val_x, val_y))
 
             self.seen_cls = exemplar.get_cur_cls()
             print("seen cls number : ", self.seen_cls)
