@@ -67,6 +67,6 @@ fi
 
 for PARADIGM in "${PARADIGMS[@]}"; do
   for RUN in "${RUNS[@]}"; do
-      python main.py --filelist_root "./../../dataloaders" --nb_protos $MEMORY_SIZE --nb_cl_fg=$CLASSES_PER_TASK --nb_cl=$CLASSES_PER_TASK --gpu=$GPU_ID --random_seed=1993 --baseline=icarl --branch_mode=dual --branch_1=ss --branch_2=free --dataset=$DATASET --scenario=$PARADIGM --runs $RUN --num_classes $NUM_CLASSES --epochs 30 --disable_gpu_occupancy --dataroot $DATAROOT --train_batch_size $BATCH_SIZE --eval_batch_size $BATCH_SIZE --test_batch_size $BATCH_SIZE
+      python main.py --filelist_root "./../../../dataloaders" --nb_protos $MEMORY_SIZE --nb_cl_fg=$CLASSES_PER_TASK --nb_cl=$CLASSES_PER_TASK --gpu=$GPU_ID --random_seed=1993 --baseline=icarl --branch_mode=dual --branch_1=ss --branch_2=free --dataset=$DATASET --scenario=$PARADIGM --runs $RUN --num_classes $NUM_CLASSES --epochs 30 --disable_gpu_occupancy --dataroot $DATAROOT --train_batch_size $BATCH_SIZE --eval_batch_size $BATCH_SIZE --test_batch_size $BATCH_SIZE
   done
 done
