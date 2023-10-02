@@ -205,9 +205,9 @@ class BaseTrainer(object):
             X_valid_total = test_data.data
             Y_valid_total = test_data.labels
             
-            X_train_total = torch.permute(torch.cat(X_train_total,0),(0,3,2,1)).numpy()
+            X_train_total = torch.cat(X_train_total,0).permute((0,3,2,1)).numpy()
             Y_train_total = np.array(Y_train_total)
-            X_valid_total = torch.permute(torch.cat(X_valid_total,0),(0,3,2,1)).numpy()
+            X_valid_total = torch.cat(X_valid_total,0).permute((0,3,2,1)).numpy()
             Y_valid_total = np.array(Y_valid_total)
             
             print(X_train_total.shape)
