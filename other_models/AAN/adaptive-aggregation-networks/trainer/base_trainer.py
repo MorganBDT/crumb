@@ -109,8 +109,14 @@ class BaseTrainer(object):
             self.balancedset = torchvision.datasets.CIFAR100(root='./data', train=False, download=False, transform=self.transform_train)
             
             # Set the network architecture
-            self.network = modified_resnet_cifar.resnet32
-            self.network_mtl = modified_resnetmtl_cifar.resnetmtl32
+            if self.args.imgnet_backbone == 'resnet18':
+                self.network = modified_resnet.resnet18
+                self.network_mtl = modified_resnetmtl.resnetmtl18
+            elif self.args.imgnet_backbone == 'resnet34':
+                self.network = modified_resnet.resnet34
+                self.network_mtl = modified_resnetmtl.resnetmtl34
+            # self.network = modified_resnet_cifar.resnet32
+            # self.network_mtl = modified_resnetmtl_cifar.resnetmtl32
             # Set the learning rate decay parameters
             self.lr_strat = [int(self.args.epochs*0.5), int(self.args.epochs*0.75)]
             # Set the dictionary size
