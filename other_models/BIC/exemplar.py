@@ -9,6 +9,10 @@ class Exemplar:
     def update(self, cls_num, train, val):
         train_x, train_y = train
         val_x, val_y = val
+        print("About to have error: ")
+        print(self.cur_cls)
+        print(len(list(self.val.keys())))
+        print(len(list(self.train.keys())))
         assert self.cur_cls == len(list(self.val.keys()))
         assert self.cur_cls == len(list(self.train.keys()))
 
