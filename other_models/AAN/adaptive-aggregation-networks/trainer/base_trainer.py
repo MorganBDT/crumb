@@ -230,22 +230,23 @@ class BaseTrainer(object):
     def init_fusion_vars(self):
         """The function to initialize the aggregation weights."""
         self.fusion_vars = nn.ParameterList()
-        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
-            # CIFAR-100, the number of blocks: 3
-            if self.args.branch_mode == 'dual':
-                # Dual branch mode, intialize the aggregation weights to 0.5
-                for idx in range(3):
-                    self.fusion_vars.append(nn.Parameter(torch.FloatTensor([0.5])))
-            elif self.args.branch_mode == 'single':
-                # Single branch mode, intialize the aggregation weights for the 1st branch to 1.0, and never update them
-                for idx in range(3):
-                    self.fusion_vars.append(nn.Parameter(torch.FloatTensor([1.0])))
-            else:
-                raise ValueError('Please set correct mode.')
-            # Send the aggregation weights to GPU 
-            self.fusion_vars.to(self.device)
-
-        elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':
+        # if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
+        #     # CIFAR-100, the number of blocks: 3
+        #     if self.args.branch_mode == 'dual':
+        #         # Dual branch mode, intialize the aggregation weights to 0.5
+        #         for idx in range(3):
+        #             self.fusion_vars.append(nn.Parameter(torch.FloatTensor([0.5])))
+        #     elif self.args.branch_mode == 'single':
+        #         # Single branch mode, intialize the aggregation weights for the 1st branch to 1.0, and never update them
+        #         for idx in range(3):
+        #             self.fusion_vars.append(nn.Parameter(torch.FloatTensor([1.0])))
+        #     else:
+        #         raise ValueError('Please set correct mode.')
+        #     # Send the aggregation weights to GPU
+        #     self.fusion_vars.to(self.device)
+        #
+        # elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':
+        if True:  # switch to using the same network for everything
             # ImageNet, the number of blocks: 4
             if self.args.branch_mode == 'dual':
                 # Dual branch mode, intialize the aggregation weights to 0.5
@@ -527,39 +528,40 @@ class BaseTrainer(object):
         Returns:
           b1_model: the 1st branch model from the current phase, the FC classifier is updated
         """
-        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
-            # Load previous FC weights, transfer them from GPU to CPU
-            old_embedding_norm = b1_model.fc.fc1.weight.data.norm(dim=1, keepdim=True)
-            average_old_embedding_norm = torch.mean(old_embedding_norm, dim=0).to('cpu').type(torch.DoubleTensor)
-            # tg_feature_model is b1_model without the FC layer
-            tg_feature_model = nn.Sequential(*list(b1_model.children())[:-1])
-            # Get the shape of the feature inputted to the FC layers, i.e., the shape for the final feature maps
-            num_features = b1_model.fc.in_features
-            # Intialize the new FC weights with zeros
-            novel_embedding = torch.zeros((self.args.nb_cl, num_features))
-            for cls_idx in range(iteration*self.args.nb_cl, (iteration+1)*self.args.nb_cl):
-                # Get the indexes of samples for one class
-                cls_indices = np.array([i == cls_idx  for i in map_Y_train])
-                # Check the number of samples in this class
-                assert(len(np.where(cls_indices==1)[0])==dictionary_size)
-                # Set a temporary dataloader for the current class
-                self.evalset.data = X_train[cls_indices].astype('uint8')
-                self.evalset.targets = np.zeros(self.evalset.data.shape[0])
-                evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
-                    shuffle=False, num_workers=self.args.num_workers)
-                num_samples = self.evalset.data.shape[0]
-                # Compute the feature maps using the current model
-                cls_features = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
-                    tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
-                # Compute the normalized feature maps 
-                norm_features = F.normalize(torch.from_numpy(cls_features), p=2, dim=1)
-                # Update the FC weights using the imprint weights, i.e., the normalized averged feature maps 
-                cls_embedding = torch.mean(norm_features, dim=0)
-                novel_embedding[cls_idx-iteration*self.args.nb_cl] = F.normalize(cls_embedding, p=2, dim=0) * average_old_embedding_norm
-            # Transfer all weights of the model to GPU
-            b1_model.to(self.device)
-            b1_model.fc.fc2.weight.data = novel_embedding.to(self.device)
-        elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':
+        # if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
+        #     # Load previous FC weights, transfer them from GPU to CPU
+        #     old_embedding_norm = b1_model.fc.fc1.weight.data.norm(dim=1, keepdim=True)
+        #     average_old_embedding_norm = torch.mean(old_embedding_norm, dim=0).to('cpu').type(torch.DoubleTensor)
+        #     # tg_feature_model is b1_model without the FC layer
+        #     tg_feature_model = nn.Sequential(*list(b1_model.children())[:-1])
+        #     # Get the shape of the feature inputted to the FC layers, i.e., the shape for the final feature maps
+        #     num_features = b1_model.fc.in_features
+        #     # Intialize the new FC weights with zeros
+        #     novel_embedding = torch.zeros((self.args.nb_cl, num_features))
+        #     for cls_idx in range(iteration*self.args.nb_cl, (iteration+1)*self.args.nb_cl):
+        #         # Get the indexes of samples for one class
+        #         cls_indices = np.array([i == cls_idx  for i in map_Y_train])
+        #         # Check the number of samples in this class
+        #         assert(len(np.where(cls_indices==1)[0])==dictionary_size)
+        #         # Set a temporary dataloader for the current class
+        #         self.evalset.data = X_train[cls_indices].astype('uint8')
+        #         self.evalset.targets = np.zeros(self.evalset.data.shape[0])
+        #         evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
+        #             shuffle=False, num_workers=self.args.num_workers)
+        #         num_samples = self.evalset.data.shape[0]
+        #         # Compute the feature maps using the current model
+        #         cls_features = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
+        #             tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
+        #         # Compute the normalized feature maps
+        #         norm_features = F.normalize(torch.from_numpy(cls_features), p=2, dim=1)
+        #         # Update the FC weights using the imprint weights, i.e., the normalized averged feature maps
+        #         cls_embedding = torch.mean(norm_features, dim=0)
+        #         novel_embedding[cls_idx-iteration*self.args.nb_cl] = F.normalize(cls_embedding, p=2, dim=0) * average_old_embedding_norm
+        #     # Transfer all weights of the model to GPU
+        #     b1_model.to(self.device)
+        #     b1_model.fc.fc2.weight.data = novel_embedding.to(self.device)
+        # elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':
+        if True: # switch to imagenet version of resnet for everything
             # Load previous FC weights, transfer them from GPU to CPU
             old_embedding_norm = b1_model.fc.fc1.weight.data.norm(dim=1, keepdim=True)
             average_old_embedding_norm = torch.mean(old_embedding_norm, dim=0).to('cpu').type(torch.DoubleTensor)
@@ -905,7 +907,7 @@ class BaseTrainer(object):
                 evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
                     shuffle=False, num_workers=self.args.num_workers)
                 num_samples = self.evalset.data.shape[0]
-                # Compute the features for the current class          
+                # Compute the features for the current class
                 mapped_prototypes = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
                     tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
                 # Herding algorithm
@@ -950,7 +952,6 @@ class BaseTrainer(object):
                 while not(np.sum(alpha_dr_herding[index1,:,index2]!=0)==min(nb_protos_cl,500)) and iter_herding_eff<1000:
                     tmp_t   = np.dot(w_t,D)
                     ind_max = np.argmax(tmp_t)
-
                     iter_herding_eff += 1
                     if alpha_dr_herding[index1,ind_max,index2] == 0:
                         alpha_dr_herding[index1,ind_max,index2] = 1+iter_herding
@@ -961,42 +962,43 @@ class BaseTrainer(object):
         # Set two empty lists for the exemplars and the labels 
         X_protoset_cumuls = []
         Y_protoset_cumuls = []
-        if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
-            class_means = np.zeros((num_features,self.args.num_classes,2))
-            for iteration2 in range(iteration+1):
-                for iter_dico in range(self.args.nb_cl):
-                    # Compute the D and D2 matrizes, which are used to compute the class mean values
-                    current_cl = order[range(iteration2*self.args.nb_cl,(iteration2+1)*self.args.nb_cl)]
-                    self.evalset.data = prototypes[iteration2*self.args.nb_cl+iter_dico].astype('uint8')
-                    self.evalset.targets = np.zeros(self.evalset.data.shape[0])
-                    evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
-                        shuffle=False, num_workers=self.args.num_workers)
-                    num_samples = self.evalset.data.shape[0]
-                    mapped_prototypes = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
-                        tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
-                    D = mapped_prototypes.T
-                    D = D/np.linalg.norm(D,axis=0)
-                    self.evalset.data = prototypes[iteration2*self.args.nb_cl+iter_dico][:,:,:,::-1].astype('uint8')
-                    evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
-                        shuffle=False, num_workers=self.args.num_workers)
-                    mapped_prototypes2 = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
-                        tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
-                    D2 = mapped_prototypes2.T
-                    D2 = D2/np.linalg.norm(D2,axis=0)
-                    # Using the indexes selected by herding
-                    alph = alpha_dr_herding[iteration2,:,iter_dico]
-                    alph = (alph>0)*(alph<nb_protos_cl+1)*1.
-                    # Add the exemplars and the labels to the lists
-                    X_protoset_cumuls.append(prototypes[iteration2*self.args.nb_cl+iter_dico,np.where(alph==1)[0]])
-                    Y_protoset_cumuls.append(order[iteration2*self.args.nb_cl+iter_dico]*np.ones(len(np.where(alph==1)[0])))
-                    # Compute the class mean values                  
-                    alph = alph/np.sum(alph)
-                    class_means[:,current_cl[iter_dico],0] = (np.dot(D,alph)+np.dot(D2,alph))/2
-                    class_means[:,current_cl[iter_dico],0] /= np.linalg.norm(class_means[:,current_cl[iter_dico],0])
-                    alph = np.ones(dictionary_size)/dictionary_size
-                    class_means[:,current_cl[iter_dico],1] = (np.dot(D,alph)+np.dot(D2,alph))/2
-                    class_means[:,current_cl[iter_dico],1] /= np.linalg.norm(class_means[:,current_cl[iter_dico],1])
-        elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':            
+        # if self.args.dataset in ["core50", "toybox", "ilab2mlight", "cifar100", "ilab2mlight+core50", "icubworldtransf"]:
+        #     class_means = np.zeros((num_features,self.args.num_classes,2))
+        #     for iteration2 in range(iteration+1):
+        #         for iter_dico in range(self.args.nb_cl):
+        #             # Compute the D and D2 matrizes, which are used to compute the class mean values
+        #             current_cl = order[range(iteration2*self.args.nb_cl,(iteration2+1)*self.args.nb_cl)]
+        #             self.evalset.data = prototypes[iteration2*self.args.nb_cl+iter_dico].astype('uint8')
+        #             self.evalset.targets = np.zeros(self.evalset.data.shape[0])
+        #             evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
+        #                 shuffle=False, num_workers=self.args.num_workers)
+        #             num_samples = self.evalset.data.shape[0]
+        #             mapped_prototypes = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
+        #                 tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
+        #             D = mapped_prototypes.T
+        #             D = D/np.linalg.norm(D,axis=0)
+        #             self.evalset.data = prototypes[iteration2*self.args.nb_cl+iter_dico][:,:,:,::-1].astype('uint8')
+        #             evalloader = torch.utils.data.DataLoader(self.evalset, batch_size=self.args.eval_batch_size,
+        #                 shuffle=False, num_workers=self.args.num_workers)
+        #             mapped_prototypes2 = compute_features(self.args, self.fusion_vars, b1_model, b2_model, \
+        #                 tg_feature_model, is_start_iteration, evalloader, num_samples, num_features)
+        #             D2 = mapped_prototypes2.T
+        #             D2 = D2/np.linalg.norm(D2,axis=0)
+        #             # Using the indexes selected by herding
+        #             alph = alpha_dr_herding[iteration2,:,iter_dico]
+        #             alph = (alph>0)*(alph<nb_protos_cl+1)*1.
+        #             # Add the exemplars and the labels to the lists
+        #             X_protoset_cumuls.append(prototypes[iteration2*self.args.nb_cl+iter_dico,np.where(alph==1)[0]])
+        #             Y_protoset_cumuls.append(order[iteration2*self.args.nb_cl+iter_dico]*np.ones(len(np.where(alph==1)[0])))
+        #             # Compute the class mean values
+        #             alph = alph/np.sum(alph)
+        #             class_means[:,current_cl[iter_dico],0] = (np.dot(D,alph)+np.dot(D2,alph))/2
+        #             class_means[:,current_cl[iter_dico],0] /= np.linalg.norm(class_means[:,current_cl[iter_dico],0])
+        #             alph = np.ones(dictionary_size)/dictionary_size
+        #             class_means[:,current_cl[iter_dico],1] = (np.dot(D,alph)+np.dot(D2,alph))/2
+        #             class_means[:,current_cl[iter_dico],1] /= np.linalg.norm(class_means[:,current_cl[iter_dico],1])
+        # elif self.args.dataset == 'imagenet_sub' or self.args.dataset == 'imagenet':
+        if True: # Use imagenet version of resnet for everything
             class_means = np.zeros((num_features, self.args.num_classes, 2))
             for iteration2 in range(iteration+1):
                 for iter_dico in range(self.args.nb_cl):
