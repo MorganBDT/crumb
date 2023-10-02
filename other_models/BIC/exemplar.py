@@ -15,7 +15,7 @@ class Exemplar:
         cur_keys = list(set(val_y))
         self.cur_cls += cls_num
         
-        total_store_num = self.max_size / self.cur_cls if self.cur_cls != 0 else max_size
+        total_store_num = self.max_size / self.cur_cls if self.cur_cls != 0 else self.max_size
         train_store_num = 1 #int(total_store_num * 0.9)
         val_store_num = 1 #int(total_store_num * 0.1)
         for key, value in self.val.items():
@@ -29,7 +29,15 @@ class Exemplar:
             else:
                 if len(self.val[y]) < val_store_num:
                     self.val[y].append(x)
-        assert self.cur_cls == len(list(self.val.keys()))
+        try:
+            assert self.cur_cls == len(list(self.val.keys()))
+        except AssertionError:
+            print("self.cur_cls and its type:")
+            print(self.cur_cls)
+            print(type(self.cur_cls))
+            print("self.val.keys() and its length as a list (should be equal to self.cur_cls):")
+            print(self.val.keys())
+            print(len(list(self.val.keys())))
         for key, value in self.val.items():
             assert len(self.val[key]) == val_store_num
 
