@@ -127,7 +127,7 @@ class Trainer:
         print("Test data number : ", len(testdata))
         self.model.eval()
 
-        classes_per_task = self.total_cls / self.n_tasks
+        classes_per_task = int(self.total_cls / self.n_tasks)
 
         task_correct = [0] * self.n_tasks  # Stores correct predictions for each task
         task_sum = [0] * self.n_tasks  # Stores total instances for each task
@@ -478,12 +478,14 @@ class Trainer:
 
     def bias_forward(self, input):
         # Consolidated version
-        classes_per_task = self.total_cls / self.n_tasks
+        assert self.total_cls % self.n_tasks == 0
+        classes_per_task = int(self.total_cls / self.n_tasks)
         ins_by_task = [input[c:c+classes_per_task] for c in range(0, self.total_cls, classes_per_task)]
         assert(len(ins_by_task) == len(self.bias_layers))
         outs = [self.bias_layers[b](b_in) for b, b_in in enumerate(ins_by_task)]
         return torch.cat(outs, dim=1)
 
+        # in1 = input[:, :5]
         # in1 = input[:, :5]
         # in2 = input[:, 5:10]
         # in3 = input[:, 10:15]
