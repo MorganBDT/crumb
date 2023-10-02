@@ -29,6 +29,7 @@ parser = argparse.ArgumentParser(description='Continuum learning')
 # experiment parameters
 parser.add_argument('--exp_name', default="imagenet_exp_01", type=str, help='id for the experiment.')
 parser.add_argument('--cuda', type=str, default='yes', help='Use GPU?')
+parser.add_argument('--gpu_id', type=int, default=0, help='id of gpu to use')
 parser.add_argument('--iid', type=str, default='no', help='Make all tasks into 1 iid distr.')
 parser.add_argument('--log_every', type=int, default=100, help='frequency of logs, in minibatches')
 parser.add_argument('--save_path', type=str, default='results/', help='save models at the end of training')
@@ -454,6 +455,7 @@ def main(overwrite_args=None):
         np.random.seed(seed)
         random.seed(seed)
         if args.cuda:
+            torch.cuda.set_device(args.gpu_id)
             torch.cuda.manual_seed_all(seed)
 
         # load data
