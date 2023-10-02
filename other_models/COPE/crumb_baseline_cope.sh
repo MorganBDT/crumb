@@ -46,6 +46,6 @@ fi
 
 for PARADIGM in "${PARADIGMS[@]}"; do
   for RUN in "${RUNS[@]}"; do
-     python main.py --dataset icubworldtransf --run $RUN --paradigm $PARADIGM --batch_size $BATCH_SIZE --n_memories $MEMORY_SIZE --gpu_id $GPU_ID
+     python main.py --dataset $DATASET --run $RUN --paradigm $PARADIGM --batch_size $BATCH_SIZE --n_memories $MEMORY_SIZE --gpu_id $GPU_ID --data_file "$DATASET".pt
   done
 done
