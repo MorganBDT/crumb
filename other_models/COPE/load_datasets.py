@@ -110,7 +110,7 @@ def load_datasets(args):
         dataroot = "/media/KLAB37/datasets/icubworldtransf_sparse"
 
         input_transform = Compose([
-            transforms.Resize(128),
+            transforms.Resize((128, 128)),
             ToTensor(),
             Normalize([0.5071, 0.4866, 0.4409], [0.2673, 0.2564, 0.2762])])
 
