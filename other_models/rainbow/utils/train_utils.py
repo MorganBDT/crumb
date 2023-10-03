@@ -1,4 +1,4 @@
-import torch_optimizer
+# import torch_optimizer
 from easydict import EasyDict as edict
 from torch import optim
 
@@ -8,8 +8,8 @@ from models import mnist, cifar, imagenet
 def select_optimizer(opt_name, lr, model, sched_name="cos"):
     if opt_name == "adam":
         opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-6)
-    elif opt_name == "radam":
-        opt = torch_optimizer.RAdam(model.parameters(), lr=lr, weight_decay=0.00001)
+    # elif opt_name == "radam":
+    #     opt = torch_optimizer.RAdam(model.parameters(), lr=lr, weight_decay=0.00001)
     elif opt_name == "sgd":
         opt = optim.SGD(
             model.parameters(), lr=lr, momentum=0.9, nesterov=True, weight_decay=1e-4
