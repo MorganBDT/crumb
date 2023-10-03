@@ -13,7 +13,7 @@ class Ilab:
     def __init__(self, paradigm, run):
         
         self.batch_num = 7     #self.rootdir = '/home/mengmi/Projects/Proj_CL_NTM/pytorch/core50/dataloaders/task_filelists/'
-        self.rootdir = '/home/rushikesh/code/dataloaders/ilab2mlight_task_filelists/'
+        self.rootdir = './../../dataloaders/ilab2mlight_task_filelists/'
         
         self.train_data = []
         self.train_labels = []

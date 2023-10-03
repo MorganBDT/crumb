@@ -1,7 +1,7 @@
 class cifar100():
 	def __init__(self, paradigm, run):
 		self.batch_num = 20
-		self.rootdir = '/home/rushikesh/code/dataloaders/cifar100_task_filelists/'
+		self.rootdir = './../../dataloaders/cifar100_task_filelists/'
 		
 		self.train_data = []
 		self.train_labels = []
