@@ -5,14 +5,14 @@ import os
 class Icub:
     def __init__(self, paradigm, run):
         
-        self.batch_num = 5
+        self.batch_num = 10
         #self.rootdir = '/home/mengmi/Projects/Proj_CL_NTM/pytorch/core50/dataloaders/task_filelists/'
         self.rootdir = './../../dataloaders/icubworldtransf_task_filelists/'
         #self.rootdir = '/media/rushikesh/New Volume/Harvard_thesis/continual_learning/code/BIC/BIC/core50/dataloaders/core50_task_filelists/'#/class_iid/run0/stream/train_task_00_filelist.txt'
         
         self.train_data = []
         self.train_labels = []
-        self.train_groups = [[],[],[],[],[]]
+        self.train_groups = [[]]*self.batch_num
         for b in range(self.batch_num):
             with open( self.rootdir + paradigm + '/run' + str(run) + '/stream/train_task_' + str(b).zfill(2) + '_filelist.txt','r') as f:
                 for i, line in enumerate(f):
@@ -30,7 +30,7 @@ class Icub:
                
         self.test_data = []
         self.test_labels = []
-        self.test_groups = [[]]*10
+        self.test_groups = [[]]*self.batch_num
         groupsid = {'0':0,'1':0,
                     '2':1,'3':1,
                     '4':2,'5':2,
