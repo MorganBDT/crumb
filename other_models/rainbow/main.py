@@ -20,6 +20,9 @@ from utils.method_manager import select_method
 def main():
     args = config.base_parser()
     print("args are",args)
+
+    os.makedirs("results", exist_ok=True)
+    os.makedirs("logs", exist_ok=True)
     
     # Save file name
     tr_names = ""
