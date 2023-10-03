@@ -56,7 +56,7 @@ def select_model(model_name, dataset, num_classes=None):
         model_class = getattr(mnist, "MLP")
     elif "cifar" in dataset:
         model_class = getattr(cifar, "ResNet")
-    elif "toybox" in dataset or "ilab" in dataset or "core50" in dataset:
+    elif "toybox" in dataset or "ilab" in dataset or "core50" or "icubworldtransf" in dataset:
         model_class = getattr(cifar, "ResNet")
     elif "imagenet" in dataset:
         model_class = getattr(imagenet, "ResNet")
