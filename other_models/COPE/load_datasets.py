@@ -20,6 +20,7 @@ def load_datasets(args):
 
     if args.dataset == 'ilab2mlight+core50':
         args.n_tasks = 12
+        n_classes = 24
         rootdir = "./../../dataloaders/ilab2mlight+core50_task_filelists/"
         dataroot = "/media/data/Datasets"
 
@@ -83,7 +84,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
 
-        cpt = int(10 / args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
 
@@ -106,6 +107,7 @@ def load_datasets(args):
 
     if args.dataset == 'icubworldtransf':
         args.n_tasks = 10
+        n_classes = 20
         rootdir = "./../../dataloaders/icubworldtransf_task_filelists/"
         dataroot = "/media/KLAB37/datasets/icubworldtransf_sparse"
 
@@ -169,7 +171,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
 
-        cpt = int(10 / args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
 
@@ -191,7 +193,8 @@ def load_datasets(args):
         return d_tr, d_te, n_inputs, n_outputs + 1, len(d_tr)
 
     if args.dataset == 'core50':
-        args.n_tasks = 5    
+        args.n_tasks = 5
+        n_classes = 10
         rootdir = './../../dataloaders/core50_task_filelists/'
         dataroot = '/media/data/Datasets/Core50/core50_128x128'
         
@@ -254,7 +257,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
         
-        cpt = int(10 / args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
         
@@ -279,6 +282,7 @@ def load_datasets(args):
     elif args.dataset == 'toybox':
 
         args.n_tasks = 6
+        n_classes = 12
         #rootdir = '/home/rushikesh/code/dataloaders/toybox_task_filelists/'
         rootdir = '/home/rushikesh/P1_Oct/toybox_task_filelists/'
         dataroot = '/media/data/morgan_data/toybox/images'
@@ -334,7 +338,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
         
-        cpt = int(12 / args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
         
@@ -359,6 +363,7 @@ def load_datasets(args):
     elif args.dataset == 'ilab':
 
         args.n_tasks = 7
+        n_classes = 14
         #rootdir = '/home/rushikesh/code/dataloaders/ilab2mlight_task_filelists/'
         rootdir = '/home/rushikesh/P1_Oct/ilab2mlight_task_filelists/'
         dataroot = '/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed'
@@ -417,7 +422,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
         
-        cpt = int(14/ args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
         
@@ -530,6 +535,7 @@ def load_datasets(args):
     elif args.dataset == 'cifar100':
 
         args.n_tasks = 20
+        n_classes = 100
         rootdir = '/home/rushikesh/code/dataloaders/cifar100_task_filelists/'
         dataroot = '/home/rushikesh/P1_Oct/cifar100/cifar100png'
 
@@ -587,7 +593,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
         
-        cpt = int(100/ args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
         
@@ -611,6 +617,7 @@ def load_datasets(args):
     elif args.dataset == 'imagenet':
 
         args.n_tasks = 10
+        n_classes = 1000
         rootdir = '/home/mbt10/crumb/dataloaders/imagenet_task_filelists/'
         dataroot = '/n/groups/kreiman/shared_data/Imagenet2012/'
         #rootdir = '/home/morgan/projects/crumb/dataloaders/imagenet_task_filelists/'
@@ -670,7 +677,7 @@ def load_datasets(args):
         x_te = torch.stack(x_te)
         y_te = torch.LongTensor(y_te)
 
-        cpt = int(100 / args.n_tasks)
+        cpt = int(n_classes / args.n_tasks)
         d_tr = []
         d_te = []
 
