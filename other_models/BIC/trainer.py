@@ -110,14 +110,14 @@ class Trainer:
         #                         self.bias_layer15,self.bias_layer16,self.bias_layer17,self.bias_layer18,self.bias_layer19,self.bias_layer20]
         #
         self.input_transform= Compose([
-                                transforms.Resize(32),
+                                transforms.Resize((128, 128)),
                                 transforms.RandomHorizontalFlip(),
-                                transforms.RandomCrop(32,padding=4),
+                                transforms.RandomCrop(128,padding=4),
                                 ToTensor(),
                                 Normalize([0.5071,0.4866,0.4409],[0.2673,0.2564,0.2762])])
 
         self.input_transform_eval= Compose([
-                                transforms.Resize(32),
+                                transforms.Resize((128, 128)),
                                 ToTensor(),
                                 Normalize([0.5071,0.4866,0.4409],[0.2673,0.2564,0.2762])])
         total_params = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
