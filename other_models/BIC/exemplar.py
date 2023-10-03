@@ -31,6 +31,7 @@ class Exemplar:
             self.train[key] = value[:train_store_num]
 
         for x, y in zip(val_x, val_y):
+            print("y:", y)
             if y not in self.val:
                 self.val[y] = [x]
             else:
