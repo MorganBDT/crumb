@@ -151,6 +151,22 @@ def base_parser():
         help="A type of uncertainty metric",
     )
 
+    parser.add_argument(
+        "--scenario",
+        type=str,
+        default="class_instance",
+        choices=["class_iid", "class_instance"],
+        help="Which scenario we are training with.",
+    )
+
+    parser.add_argument(
+        "--gpu_id",
+        type=int,
+        default=0,
+        help="ID of gpu to use",
+    )
+
+
     # Debug
     parser.add_argument("--debug", action="store_true", help="Turn on Debug mode")
 

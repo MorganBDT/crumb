@@ -1,15 +1,21 @@
 #/bin/bash
 
+DATASET=${1:-"core50"}
+SCENARIO=${2:-"class_instance"}
+GPU_ID="${3:-0}"
+
+
+# SCENARIO="class_instance"
 # CIL CONFIG
 #exhp "asdasd"
 MODE="rm" # joint, gdumb, icarl, rm, ewc, rwalk, bic
 # "default": If you want to use the default memory management method.
 MEM_MANAGE="default" # default, random, reservoir, uncertainty, prototype.
 RND_SEED=1
-DATASET="cifar100" # mnist, cifar10, cifar100, imagenet
+# DATASET="cifar100" # mnist, cifar10, cifar100, imagenet
 STREAM="online" # offline, online
 EXP="blurry30" # disjoint, blurry10, blurry30
-MEM_SIZE=400 # cifar10: k={200, 500, 1000}, mnist: k=500, cifar100: k=2,000, imagenet: k=20,000
+#MEM_SIZE=400 # cifar10: k={200, 500, 1000}, mnist: k=500, cifar100: k=2,000, imagenet: k=20,000
 TRANS="cutmix autoaug" # multiple choices: cutmix, cutout, randaug, autoaug
 
 N_WORKER=4
@@ -32,6 +38,7 @@ fi
 
 if [ "$DATASET" == "mnist" ]; then
     TOTAL=50000 N_VAL=250 N_CLASS=10 TOPK=1
+    MEM_SIZE=500
     MODEL_NAME="mlp400"
     N_EPOCH=5; BATCHSIZE=16; LR=0.05 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -44,6 +51,7 @@ if [ "$DATASET" == "mnist" ]; then
     fi
 elif [ "$DATASET" == "cifar10" ]; then
     TOTAL=50000 N_VAL=250 N_CLASS=10 TOPK=1
+    MEM_SIZE=500
     MODEL_NAME="resnet18"
     N_EPOCH=256; BATCHSIZE=16; LR=0.05 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -56,6 +64,7 @@ elif [ "$DATASET" == "cifar10" ]; then
     fi
 elif [ "$DATASET" == "cifar100" ]; then
     TOTAL=50000 N_VAL=0 N_CLASS=100 TOPK=1
+    MEM_SIZE=100
     MODEL_NAME="resnet32"
     N_EPOCH=5; BATCHSIZE=16; LR=0.008 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -69,6 +78,7 @@ elif [ "$DATASET" == "cifar100" ]; then
 
 elif [ "$DATASET" == "toybox" ]; then
     TOTAL=50000 N_VAL=0 N_CLASS=12 TOPK=1
+    MEM_SIZE=15
     MODEL_NAME="resnet32"
     N_EPOCH=5; BATCHSIZE=64; LR=0.008 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -80,8 +90,9 @@ elif [ "$DATASET" == "toybox" ]; then
         N_INIT_CLS=12 N_CLS_A_TASK=2 N_TASKS=6
     fi
 
-elif [ "$DATASET" == "ilab" ]; then
+elif [ "$DATASET" == "ilab2mlight" ]; then
     TOTAL=50000 N_VAL=0 N_CLASS=14 TOPK=1
+    MEM_SIZE=15
     MODEL_NAME="resnet32"
     N_EPOCH=5; BATCHSIZE=64; LR=0.008 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -95,6 +106,7 @@ elif [ "$DATASET" == "ilab" ]; then
 
 elif [ "$DATASET" == "core50" ]; then
     TOTAL=50000 N_VAL=0 N_CLASS=10 TOPK=1
+    MEM_SIZE=15
     MODEL_NAME="resnet32"
     N_EPOCH=5; BATCHSIZE=64; LR=0.004 OPT_NAME="sgd" SCHED_NAME="cos"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -109,8 +121,43 @@ elif [ "$DATASET" == "core50" ]; then
         echo "here2"
     fi
 
+elif [ "$DATASET" == "ilab2mlight+core50" ]; then
+    TOTAL=50000 N_VAL=0 N_CLASS=24 TOPK=1
+    MEM_SIZE=30
+    MODEL_NAME="resnet32"
+    N_EPOCH=5; BATCHSIZE=21; LR=0.004 OPT_NAME="sgd" SCHED_NAME="cos"
+    if [ "${MODE_LIST[0]}" == "joint" ]; then
+       # N_INIT_CLS=100 N_CLS_A_TASK=100 N_TASKS=1
+       echo "here"
+       N_INIT_CLS=24 N_CLS_A_TASK=2 N_TASKS=12
+    elif [[ "$EXP" == *"blurry"* ]]; then
+        N_INIT_CLS=24 N_CLS_A_TASK=2 N_TASKS=12
+        echo "here1"
+    else
+        N_INIT_CLS=24 N_CLS_A_TASK=2 N_TASKS=12
+        echo "here2"
+    fi
+
+elif [ "$DATASET" == "icubworldtransf" ]; then
+    TOTAL=50000 N_VAL=0 N_CLASS=20 TOPK=1
+    MEM_SIZE=30
+    MODEL_NAME="resnet32"
+    N_EPOCH=5; BATCHSIZE=21; LR=0.004 OPT_NAME="sgd" SCHED_NAME="cos"
+    if [ "${MODE_LIST[0]}" == "joint" ]; then
+       # N_INIT_CLS=100 N_CLS_A_TASK=100 N_TASKS=1
+       echo "here"
+       N_INIT_CLS=20 N_CLS_A_TASK=2 N_TASKS=10
+    elif [[ "$EXP" == *"blurry"* ]]; then
+        N_INIT_CLS=20 N_CLS_A_TASK=2 N_TASKS=10
+        echo "here1"
+    else
+        N_INIT_CLS=20 N_CLS_A_TASK=2 N_TASKS=10
+        echo "here2"
+    fi
+
 elif [ "$DATASET" == "imagenet" ]; then
     TOTAL=50000 N_VAL=0 N_CLASS=1000 TOPK=5
+    MEM_SIZE=10000
     MODEL_NAME="resnet34"
     N_EPOCH=100; BATCHSIZE=256; LR=0.05 OPT_NAME="sgd" SCHED_NAME="multistep"
     if [ "${MODE_LIST[0]}" == "joint" ]; then
@@ -139,5 +186,5 @@ python main.py --mode $MODE --mem_manage $MEM_MANAGE --exp_name $EXP \
 --lr $LR --batchsize $BATCHSIZE \
 --n_worker $N_WORKER --n_epoch $N_EPOCH \
 --memory_size $MEM_SIZE --transform $TRANS --uncert_metric $UNCERT_METRIC \
---feature_size $FEAT_SIZE $distilling --joint_acc $JOINT_ACC --run $i
+--feature_size $FEAT_SIZE $distilling --joint_acc $JOINT_ACC --run $i --scenario $SCENARIO --gpu_id $GPU_ID
 done

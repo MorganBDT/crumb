@@ -41,7 +41,9 @@ def main():
     writer = SummaryWriter("tensorboard")
 
     if torch.cuda.is_available():
+        torch.cuda.set_device(args.gpu_id)
         device = torch.device("cuda")
+
     else:
         device = torch.device("cpu")
     logger.info(f"Set the device ({device})")
