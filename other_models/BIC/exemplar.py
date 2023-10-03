@@ -15,6 +15,7 @@ class Exemplar:
         print("self.val.keys() and its length as a list (should be equal to self.cur_cls):")
         print(self.val.keys())
         print(len(list(self.val.keys())))
+        print(self.val.items())
         assert self.cur_cls == len(list(self.val.keys()))
         assert self.cur_cls == len(list(self.train.keys()))
 
