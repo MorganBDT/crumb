@@ -21,14 +21,14 @@ def main():
     args = config.base_parser()
     print("args are",args)
 
-    os.makedirs("results", exist_ok=True)
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs(os.path.join("results", args.dataset), exist_ok=True)
+    os.makedirs(os.path.join("logs", args.dataset), exist_ok=True)
     
     # Save file name
     tr_names = ""
     for trans in args.transforms:
         tr_names += "_" + trans
-    save_path = f"{args.dataset}/{args.mode}_{args.mem_manage}_{args.stream_env}_msz{args.memory_size}_rnd{args.rnd_seed}{tr_names}"
+    save_path = f"{args.dataset}/{args.mode}_{args.mem_manage}_{args.stream_env}_{args.scenario}_run{args.run}_msz{args.memory_size}_rnd{args.rnd_seed}{tr_names}"
 
     logging.config.fileConfig("./configuration/logging.conf")
     logger = logging.getLogger()
