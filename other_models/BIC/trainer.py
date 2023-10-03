@@ -38,14 +38,14 @@ class Trainer:
         self.dataset_name = dataset
         if dataset == "core50":
             self.dataset = Core50(paradigm, run)
-            self.n_tasks = 10
+            self.n_tasks = 5
         elif dataset == 'toybox':
             self.dataset = Toybox(paradigm, run)
-            self.n_tasks = 12
+            self.n_tasks = 6
         elif dataset == "ilab":
             print("in ilab data")
             self.dataset = Ilab(paradigm, run)
-            self.n_tasks = 14
+            self.n_tasks = 7
         elif dataset == "cifar100":
             print("in cifar100 data")
             self.dataset = cifar100(paradigm, run)
