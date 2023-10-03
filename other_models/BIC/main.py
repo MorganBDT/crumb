@@ -39,9 +39,9 @@ if __name__ == "__main__":
     test_df = pd.DataFrame(test_accs_all)
     print("testing accuracies")
     print(test_df)
-    test_df.to_csv(os.path.join('output/test_' + args.paradigm + '.csv'), index = False, header = False)
+    test_df.to_csv(os.path.join('output/' + args.dataset + '_test_' + args.paradigm + '.csv'), index = False, header = False)
 
     test_df_1st = pd.DataFrame(first_task_test_res_final_all)
     print("testing accuracies 1st Task")
     print(test_df_1st)
-    test_df_1st.to_csv(os.path.join('output/1st_task_test_' + args.paradigm + '.csv'), index = False, header = False)
+    test_df_1st.to_csv(os.path.join('output/' + args.dataset + '_1st_task_test_' + args.paradigm + '.csv'), index = False, header = False)
