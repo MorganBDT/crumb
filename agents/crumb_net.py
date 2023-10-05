@@ -10,7 +10,6 @@ from torchvision import models
 from torch.nn.parameter import Parameter
 from .crumbr import CrumbReconstructor
 from utils.random_crop import RandomResizeCrop
-from welford import Welford
 
 
 class Net(nn.Module):
