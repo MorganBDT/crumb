@@ -24,12 +24,11 @@ else
     exit
 fi
 
-# RUNS=(0 1 2 3 4)
-RUNS=(0) # TODO
+RUNS=(0 1 2 3 4)
 for RUN in "${RUNS[@]}"; do
     mkdir -p "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"
     mkdir -p "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"
 
-    python -u experiment_aug.py --scenario class_iid      --storage_type merec --specific_runs $RUN --n_epoch_first_task 1 --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks 256 --memblock_length 8 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 --lr "$LR" --memory_size 0 --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"/log.log
-    python -u experiment_aug.py --scenario class_instance --storage_type merec --specific_runs $RUN --n_epoch_first_task 1 --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks 256 --memblock_length 8 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 --lr "$LR" --memory_size 0 --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"/log.log
+    python -u experiment_aug.py --scenario class_iid      --storage_type merec --specific_runs $RUN --n_epoch_first_task 10 --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks 256 --memblock_length 8 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 --lr "$LR" --memory_size 0 --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"/log.log
+    python -u experiment_aug.py --scenario class_instance --storage_type merec --specific_runs $RUN --n_epoch_first_task 10 --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks 256 --memblock_length 8 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 --lr "$LR" --memory_size 0 --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"/log.log
 done
