@@ -157,7 +157,9 @@ class Crumb(nn.Module):
         return loss
 
     def merec_sample(self, w):  # w is a Welford object from the welford python library
-        return torch.Tensor(np.random.multivariate_normal(w.mean, np.diag(w.var_p)))
+        mean = w.mean
+        # return torch.Tensor(np.random.multivariate_normal(w.mean, np.diag(w.var_p)))
+        return torch.Tensor(mean + np.random.randn(mean.shape[0]) * np.sqrt(w.var_p))
 
     # replay old reading attention
     def criterion_replay(self, target, storage_type="feature"):
