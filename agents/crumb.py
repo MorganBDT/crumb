@@ -12,6 +12,7 @@ import torch.nn as nn
 from .crumb_net import Net
 from utils.metric import accuracy, AverageMeter, Timer
 import scipy.io as sio
+from welford import Welford
 
 
 class Crumb(nn.Module):
@@ -155,6 +156,9 @@ class Crumb(nn.Module):
         loss = self.criterion_fn(pred, target)
         return loss
 
+    def merec_sample(self, w):  # w is a Welford object from the welford python library
+        return torch.Tensor(np.random.multivariate_normal(w.mean, np.diag(w.var_p)))
+
     # replay old reading attention
     def criterion_replay(self, target, storage_type="feature"):
         labelslist = target.tolist()
@@ -171,7 +175,10 @@ class Crumb(nn.Module):
 
             # find corresponding memory block indices for replaying classes
             for i in range(replaytimes):
-                temp_store = [self.memory_storage[i][random.randint(0, self.memory_storage[i].size(0) - 1)] for i in replay_labels[0:replay_batchsize]]
+                if storage_type == "merec":
+                    temp_store = [self.merec_sample(self.memory_storage[i]) for i in replay_labels[0:replay_batchsize]]
+                else:
+                    temp_store = [self.memory_storage[i][random.randint(0, self.memory_storage[i].size(0) - 1)] for i in replay_labels[0:replay_batchsize]]
                 replay_examples_list += temp_store
                 replay_labels += replay_labels[0:replay_batchsize]
                 
@@ -182,7 +189,7 @@ class Crumb(nn.Module):
             replay_examples = torch.stack(replay_examples_list)
             if storage_type == "image":
                 replay_read = replay_examples.view(-1, 3, 224, 224)
-            elif storage_type in ["raw_feature", "enhanced_raw_feature"]:
+            elif storage_type in ["raw_feature", "enhanced_raw_feature", "merec"]:
                 replay_read = replay_examples.view(-1, self.net.compressedChannel, self.net.origsz, self.net.origsz)
             elif storage_type == "feature":
                 replay_read = self.net.crumbr.top1_inds_to_fbank(replay_examples.long())
@@ -211,7 +218,7 @@ class Crumb(nn.Module):
                         replay_read[i, :, :, :] = torch.flip(replay_read[i, :, :, :], [1])
             if storage_type == "image":
                 logits = self.net.forward_direct_only(replay_read)
-            elif storage_type in ["feature", "raw_feature", "enhanced_raw_feature"]:
+            elif storage_type in ["feature", "raw_feature", "enhanced_raw_feature", "merec"]:
                 logits = self.net.forward_from_fbanks(replay_read)
             else:
                 raise ValueError("Invalid storage type: '" + str(storage_type) + "'")
@@ -289,26 +296,40 @@ class Crumb(nn.Module):
             else:
                 stored_ex = self.net.images_to_storage(inputs, storage_type=self.config["storage_type"])
 
-            all_classes_full = True  # Will be set to False if any class is not at capacity
-            for cls in self.active_out_nodes:
-                all_examples_storage_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
-                if len(all_examples_storage_list) > 0:
-                    selected_examples_storage = torch.stack(all_examples_storage_list[0::img_skip], dim=0)
+            # Zhang, Baosheng, Yuchen Guo, Yipeng Li, Yuwei He, Haoqian Wang, and Qionghai Dai.
+            # "Memory recall: A simple neural network training framework against catastrophic forgetting."
+            # IEEE Transactions on Neural Networks and Learning Systems 33, no. 5 (2021): 2010-2022.
+            if self.config["storage_type"] == "merec":
+                for cls in self.active_out_nodes:
 
-                    if cls in self.memory_storage:
-                        self.memory_storage[cls] = torch.cat((self.memory_storage[cls], selected_examples_storage), dim=0)
+                    if cls not in self.memory_storage:
+                        self.memory_storage[cls] = Welford()
+
+                    class_examples_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
+                    for ex in class_examples_list:
+                        self.memory_storage[cls].add(ex.numpy())
+
+            else:
+                all_classes_full = True  # Will be set to False if any class is not at capacity
+                for cls in self.active_out_nodes:
+                    all_examples_storage_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
+                    if len(all_examples_storage_list) > 0:
+                        selected_examples_storage = torch.stack(all_examples_storage_list[0::img_skip], dim=0)
+
+                        if cls in self.memory_storage:
+                            self.memory_storage[cls] = torch.cat((self.memory_storage[cls], selected_examples_storage), dim=0)
+                        else:
+                            self.memory_storage[cls] = selected_examples_storage
+
+                    # Pop out old examples (queue). Stored examples from old classes need to make space for new classes
+                    if cls in self.memory_storage and self.memory_storage[cls].size(0) >= avgSampleNum:
+                        self.memory_storage[cls] = self.memory_storage[cls][(self.memory_storage[cls].size(0) - avgSampleNum):, :]
                     else:
-                        self.memory_storage[cls] = selected_examples_storage
+                        all_classes_full = False
 
-                # Pop out old examples (queue). Stored examples from old classes need to make space for new classes
-                if cls in self.memory_storage and self.memory_storage[cls].size(0) >= avgSampleNum:
-                    self.memory_storage[cls] = self.memory_storage[cls][(self.memory_storage[cls].size(0) - avgSampleNum):, :]
-                else:
-                    all_classes_full = False
-
-            if all_classes_full:
-                print("Stored sufficient examples for all classes")
-                break
+                if all_classes_full:
+                    print("Stored sufficient examples for all classes")
+                    break
 
         if self.config["storage_type"] == "enhanced_raw_feature":
             # Save feature tensors for analysis
