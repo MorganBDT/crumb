@@ -340,13 +340,14 @@ class Crumb(nn.Module):
             np.save(os.path.join(self.config["full_out_dir"], "enhanced_fm_r" + str(run) + "_t" + str(task)), np.vstack(enhanced_feature_maps_save))
             np.save(os.path.join(self.config["full_out_dir"], "target_r" + str(run) + "_t" + str(task)), np.vstack(target_save))
 
-        # Print memory storage stats
-        for cls in self.active_out_nodes:
-            print("Number of samples stored for class id " + str(cls) + ": " + str(self.memory_storage[cls].size(0)))
-        sz_bytes = sum([sys.getsizeof(att_tensor.storage()) for att_tensor in self.memory_storage.values()])
-        num_ex = sum([att_tensor.size(0) for att_tensor in self.memory_storage.values()])
-        assert num_ex <= self.capacity, "Exceeded replay attention storage. Trying to store " + str(num_ex) + " examples with capacity=" + str(self.capacity)
-        print("Size of replay attention storage for " + str(num_ex) + " examples in bytes: " + str(sz_bytes))
+        if not self.config["storage_type"] == "merec":
+            # Print memory storage stats
+            for cls in self.active_out_nodes:
+                print("Number of samples stored for class id " + str(cls) + ": " + str(self.memory_storage[cls].size(0)))
+            sz_bytes = sum([sys.getsizeof(att_tensor.storage()) for att_tensor in self.memory_storage.values()])
+            num_ex = sum([att_tensor.size(0) for att_tensor in self.memory_storage.values()])
+            assert num_ex <= self.capacity, "Exceeded replay attention storage. Trying to store " + str(num_ex) + " examples with capacity=" + str(self.capacity)
+            print("Size of replay attention storage for " + str(num_ex) + " examples in bytes: " + str(sz_bytes))
 
         if self.config["storage_type"] == "feature":
             # update least used memory slots
