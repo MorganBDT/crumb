@@ -282,9 +282,9 @@ def get_args(argv):
     # parser.add_argument('--dataroot', type = str, default = 'data/core50', help = "Directory that contains the data")
     parser.add_argument('--dataroot', type=str, default='/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50',
                         help="Directory that contains the data")
-    parser.add_argument('imagenet_styletransfer_dataroot', type=str, default='/media/KLAB37/datasets/imagenet-styletransfer-v2',
+    parser.add_argument('--imagenet_styletransfer_dataroot', type=str, default='/media/KLAB37/datasets/imagenet-styletransfer-v2',
                         help="Directory for style-transfered imagenet (https://github.com/rgeirhos/Stylized-ImageNet)")
-    parser.add_argument('include_style_transfer', default=False, action='store_true', help='Include style-transferred ImageNet perturbation')
+    parser.add_argument('--include_style_transfer', default=False, action='store_true', help='Include style-transferred ImageNet perturbation')
     # parser.add_argument('--dataroot', type = str, default = '/home/mengmi/Projects/Proj_CL_NTM/data/core50', help = "Directory that contains the data")
     parser.add_argument('--filelist_root', type=str, default='dataloaders',
                         help="Directory that contains the filelists for each task")
