@@ -173,41 +173,42 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     if args.dataset == 'imagenet' and args.include_style_transfer:
         perturbations.insert(0, 'style')  # Style first for testing purposes
 
-    ablated_accs = {pert: None for pert in perturbations}
+    ablated_accs = [{pert: None for pert in perturbations} for _ in args.acc_topk]
 
     for perturbation in perturbations:
         set_seed(0)
         if perturbation == 'style':
             data = style_transfer_test_data
-            topk_ind = 1  # index for top-5
         else:
             data = test_data
-            topk_ind = 0
         test_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=True, num_workers=args.n_workers, pin_memory=True)
         test_accs_mem, test_accs_direct, all_accs_mem, all_accs_dir, test_time, all_targets = agent.validation(test_loader, args.acc_topk, test_perturbation=perturbation, get_all_accs=True)
         print(' * Test Acc for ' + perturbation + ' perturbation: A-out {test_acc_out:.3f}, A-direct {test_acc_direct:.3f}, Time: {time:.2f}'.format(
-                test_acc_out=test_accs_mem[topk_ind], test_acc_direct=test_accs_direct[topk_ind], time=test_time))
+                test_acc_out=test_accs_mem[0], test_acc_direct=test_accs_direct[0], time=test_time))
         assert unablated_hash == hash(tuple(all_targets)), "Something went wrong with the seeded dataset shuffling"
-        ablated_accs[perturbation] = [top1_top5_accs[topk_ind] for top1_top5_accs in all_accs_dir]
+
+        for topk, topk_ind in args.acc_topk:
+            ablated_accs[topk_ind][perturbation] = [top1_top5_accs[topk_ind] for top1_top5_accs in all_accs_dir]
 
         assert all_targets == full_all_targets, "Something went wrong with the deterministically seeded dataloader batch shuffling"
 
-    num_batches = len(ablated_accs[perturbation])
+    num_batches = len(ablated_accs[0][perturbation])
 
-    df_dict = {
-        "run": [run] * num_batches,
-        "batch": list(range(num_batches)),
-        "batch_order_hash": hash(tuple(all_targets)),
-        "unablated_acc": [top1_top5_accs[0] for top1_top5_accs in full_all_accs_dir],
-        "spatial_perturb_acc": ablated_accs["spatial"],
-        "feature_perturb_acc": ablated_accs["feature"],
-    }
-    if args.dataset == 'imagenet' and args.include_style_transfer:
-        df_dict["style_perturb_acc"] = ablated_accs["style"]
+    for topk, topk_ind in args.acc_topk:
+        df_dict = {
+            "run": [run] * num_batches,
+            "batch": list(range(num_batches)),
+            "batch_order_hash": hash(tuple(all_targets)),
+            "unablated_acc": [top1_top5_accs[topk_ind] for top1_top5_accs in full_all_accs_dir],
+            "spatial_perturb_acc": ablated_accs[topk_ind]["spatial"],
+            "feature_perturb_acc": ablated_accs[topk_ind]["feature"],
+        }
+        if args.dataset == 'imagenet' and args.include_style_transfer:
+            df_dict["style_perturb_acc"] = ablated_accs[topk_ind]["style"]
 
-    df = pd.DataFrame(df_dict)
-    total_path = get_out_path(args)
-    df.to_csv(os.path.join(total_path, "shape_bias_accs_run" + str(run) + ".csv"))
+        df = pd.DataFrame(df_dict)
+        total_path = get_out_path(args)
+        df.to_csv(os.path.join(total_path, "shape_bias_accs_run" + str(run) + "_top" + str(topk) + ".csv"))
 
     return None
 
