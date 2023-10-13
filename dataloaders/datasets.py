@@ -3,6 +3,7 @@ import os.path
 import torch.utils.data as data
 from torchvision.datasets.utils import download_url, check_integrity
 from torchvision.datasets.folder import pil_loader
+from pathlib import Path
 
 
 class CORE50(data.Dataset):
@@ -154,8 +155,7 @@ class CORE50(data.Dataset):
 class Generic_Dataset(data.Dataset):
 
     def __init__(self, dataroot, dataset="toybox", filelist_root='dataloaders', scenario='iid', offline=False, train=True,
-                 run=0, batch=0, transform=None,
-                 target_transform=None):
+                 run=0, batch=0, transform=None, target_transform=None, ext=None):
 
         self.dataroot = os.path.expanduser(dataroot)
         self.filelist_root = os.path.expanduser(filelist_root)
@@ -208,6 +208,9 @@ class Generic_Dataset(data.Dataset):
                 if line.strip():
                     path, label = line.split()
                     self.labels.append(int(label))
+                    if ext is not None:  # Replace file name extension
+                        path_ = Path(path)
+                        path = str(path_.with_suffix(ext))
                     self.img_paths.append(path)
 
     def __getitem__(self, index):

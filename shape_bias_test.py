@@ -145,7 +145,7 @@ def run(args, run):
         # get test data
         style_transfer_test_data = datasets.Generic_Dataset(
             dataroot=args.imagenet_styletransfer_dataroot, dataset=args.dataset, filelist_root=args.filelist_root, scenario=args.scenario, offline=args.offline,
-            run=run, train=False, transform=composed)
+            run=run, train=False, transform=composed, ext=".png")
     else:
         style_transfer_test_data = None
 
