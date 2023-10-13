@@ -139,12 +139,22 @@ def run(args, run):
     else:
         raise ValueError("Invalid dataset name, try 'core50', 'toybox', 'ilab2mlight', 'cifar100', or 'imagenet'")
 
-    visualizations = make_visualizations(agent, composed, args, run, tasks, active_out_nodes, test_data)
+    if args.dataset == 'imagenet' and args.include_style_transfer:
+        composed = transforms.Compose(
+            [transforms.Resize([224, 224]), transforms.ToTensor(), transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+        # get test data
+        style_transfer_test_data = datasets.Generic_Dataset(
+            dataroot=args.imagenet_styletransfer_dataroot, dataset=args.dataset, filelist_root=args.filelist_root, scenario=args.scenario, offline=args.offline,
+            run=run, train=False, transform=composed)
+    else:
+        style_transfer_test_data = None
+
+    visualizations = make_visualizations(agent, composed, args, run, tasks, active_out_nodes, test_data, style_transfer_test_data)
 
     return visualizations
 
 
-def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, test_data):
+def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, test_data, style_transfer_test_data=None):
 
     if args.offline:
         print('============BEGINNING OFFLINE VISUALIZATIONS============')
@@ -159,14 +169,19 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
         test_acc_out=full_test_accs_mem[0], test_acc_direct=full_test_accs_direct[0], time=test_time))
     unablated_hash = hash(tuple(full_all_targets))
 
-    ablated_accs = {
-        "spatial": None,
-        "feature": None
-    }
+    perturbations = ['spatial', 'feature']
+    if args.dataset == 'imagenet' and args.include_style_transfer:
+        perturbations.insert(0, 'style')  # Style first for testing purposes
 
-    for perturbation in ['spatial', 'feature']:
+    ablated_accs = {pert: None for pert in perturbations}
+
+    for perturbation in perturbations:
         set_seed(0)
-        test_loader = torch.utils.data.DataLoader(test_data, batch_size=args.batch_size, shuffle=True, num_workers=args.n_workers, pin_memory=True)
+        if perturbation == 'style':
+            data = style_transfer_test_data
+        else:
+            data = test_data
+        test_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=True, num_workers=args.n_workers, pin_memory=True)
         test_accs_mem, test_accs_direct, all_accs_mem, all_accs_dir, test_time, all_targets = agent.validation(test_loader, args.acc_topk, test_perturbation=perturbation, get_all_accs=True)
         print(' * Test Acc for ' + perturbation + ' perturbation: A-out {test_acc_out:.3f}, A-direct {test_acc_direct:.3f}, Time: {time:.2f}'.format(
                 test_acc_out=test_accs_mem[0], test_acc_direct=test_accs_direct[0], time=test_time))
@@ -177,14 +192,18 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     num_batches = len(ablated_accs[perturbation])
 
-    df = pd.DataFrame({
+    df_dict = {
         "run": [run] * num_batches,
         "batch": list(range(num_batches)),
         "batch_order_hash": hash(tuple(all_targets)),
         "unablated_acc": [top1_top5_accs[0] for top1_top5_accs in full_all_accs_dir],
         "spatial_perturb_acc": ablated_accs["spatial"],
         "feature_perturb_acc": ablated_accs["feature"],
-    })
+    }
+    if args.dataset == 'imagenet' and args.include_style_transfer:
+        df_dict["style_perturb_acc"] = ablated_accs["style"]
+
+    df = pd.DataFrame(df_dict)
     total_path = get_out_path(args)
     df.to_csv(os.path.join(total_path, "shape_bias_accs_run" + str(run) + ".csv"))
 
@@ -263,6 +282,9 @@ def get_args(argv):
     # parser.add_argument('--dataroot', type = str, default = 'data/core50', help = "Directory that contains the data")
     parser.add_argument('--dataroot', type=str, default='/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50',
                         help="Directory that contains the data")
+    parser.add_argument('imagenet_styletransfer_dataroot', type=str, default='/media/KLAB37/datasets/imagenet-styletransfer-v2',
+                        help="Directory for style-transfered imagenet (https://github.com/rgeirhos/Stylized-ImageNet)")
+    parser.add_argument('include_style_transfer', default=False, action='store_true', help='Include style-transferred ImageNet perturbation')
     # parser.add_argument('--dataroot', type = str, default = '/home/mengmi/Projects/Proj_CL_NTM/data/core50', help = "Directory that contains the data")
     parser.add_argument('--filelist_root', type=str, default='dataloaders',
                         help="Directory that contains the filelists for each task")
