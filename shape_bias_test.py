@@ -179,14 +179,16 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
         set_seed(0)
         if perturbation == 'style':
             data = style_transfer_test_data
+            topk_ind = 1  # index for top-5
         else:
             data = test_data
+            topk_ind = 0
         test_loader = torch.utils.data.DataLoader(data, batch_size=args.batch_size, shuffle=True, num_workers=args.n_workers, pin_memory=True)
         test_accs_mem, test_accs_direct, all_accs_mem, all_accs_dir, test_time, all_targets = agent.validation(test_loader, args.acc_topk, test_perturbation=perturbation, get_all_accs=True)
         print(' * Test Acc for ' + perturbation + ' perturbation: A-out {test_acc_out:.3f}, A-direct {test_acc_direct:.3f}, Time: {time:.2f}'.format(
-                test_acc_out=test_accs_mem[0], test_acc_direct=test_accs_direct[0], time=test_time))
+                test_acc_out=test_accs_mem[topk_ind], test_acc_direct=test_accs_direct[topk_ind], time=test_time))
         assert unablated_hash == hash(tuple(all_targets)), "Something went wrong with the seeded dataset shuffling"
-        ablated_accs[perturbation] = [top1_top5_accs[0] for top1_top5_accs in all_accs_dir]
+        ablated_accs[perturbation] = [top1_top5_accs[topk_ind] for top1_top5_accs in all_accs_dir]
 
         assert all_targets == full_all_targets, "Something went wrong with the deterministically seeded dataloader batch shuffling"
 
