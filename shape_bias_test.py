@@ -187,14 +187,14 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
                 test_acc_out=test_accs_mem[0], test_acc_direct=test_accs_direct[0], time=test_time))
         assert unablated_hash == hash(tuple(all_targets)), "Something went wrong with the seeded dataset shuffling"
 
-        for topk, topk_ind in args.acc_topk:
+        for topk_ind, _ in enumerate(args.acc_topk):
             ablated_accs[topk_ind][perturbation] = [top1_top5_accs[topk_ind] for top1_top5_accs in all_accs_dir]
 
         assert all_targets == full_all_targets, "Something went wrong with the deterministically seeded dataloader batch shuffling"
 
     num_batches = len(ablated_accs[0][perturbation])
 
-    for topk, topk_ind in args.acc_topk:
+    for topk_ind, topk in enumerate(args.acc_topk):
         df_dict = {
             "run": [run] * num_batches,
             "batch": list(range(num_batches)),
