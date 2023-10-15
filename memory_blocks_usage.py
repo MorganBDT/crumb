@@ -189,7 +189,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             themes.theme_bw()
     )
 
-    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=12, height=4, dpi=1200)
+    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=6, height=4, dpi=2400)
 
     return None
 
