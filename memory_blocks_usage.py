@@ -190,7 +190,6 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             geom_bar(stat='identity', fill='blue') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.5) +
             labs(x='memory block index', y='frequency') +
-            scale_y_log10() +
             themes.theme_bw()
     )
 
