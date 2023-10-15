@@ -172,9 +172,9 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
-        'memory block index': torch.arange(args.n_memblocks).numpy(),
-        'frequency': mean_frequencies.numpy(),
-        'std_dev': std_dev.numpy()
+        'memory block index': torch.arange(args.n_memblocks).cpu().numpy(),
+        'frequency': mean_frequencies.cpu().numpy(),
+        'std_dev': std_dev.cpu().numpy()
     })
 
     # Plot using plotnine
