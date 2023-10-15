@@ -168,6 +168,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     frequencies_per_example = [(flattened == i).sum(dim=1) for i in range(args.n_memblocks)]
     mean_frequencies = torch.stack([frequencies.float().mean() for frequencies in frequencies_per_example])
+    print(mean_frequencies)
     std_dev = torch.stack([frequencies.float().std() for frequencies in frequencies_per_example])
 
     total_count = flattened.numel()
