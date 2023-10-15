@@ -182,11 +182,11 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             ggplot(df, aes(x='memory block index', y='frequency')) +
             geom_bar(stat='identity', fill='blue') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.5) +
-            labs(x='memory block index', y='frequency', title='Histogram of Memory Block Indices') +
+            labs(x='memory block index', y='frequency') +
             themes.theme_bw()
     )
 
-    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=6, height=4, dpi=300)
+    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=12, height=4, dpi=300)
 
     return None
 
