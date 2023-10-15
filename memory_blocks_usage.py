@@ -166,17 +166,14 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     flattened = all_mem_inds.view(all_mem_inds.size(0), -1)
 
-    # Count occurrence of each integer
-    count = torch.zeros(args.n_memblocks)
-    std_dev = torch.zeros(args.n_memblocks)
-    for i in range(args.n_memblocks):
-        count[i] = torch.sum(flattened == i)
-        std_dev[i] = torch.std((flattened == i).float(), dim=0)
+    frequencies_per_example = [(flattened == i).sum(dim=1) for i in range(args.n_memblocks)]
+    mean_frequencies = torch.stack([frequencies.float().mean() for frequencies in frequencies_per_example])
+    std_dev = torch.stack([frequencies.float().std() for frequencies in frequencies_per_example])
 
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
-        'memory block index': torch.arange(256).numpy(),
-        'frequency': count.numpy(),
+        'memory block index': torch.arange(args.n_memblocks).numpy(),
+        'frequency': mean_frequencies.numpy(),
         'std_dev': std_dev.numpy()
     })
 
