@@ -190,7 +190,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             geom_bar(stat='identity', fill='red') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
             labs(x='memory block index', y='frequency') +
-            scale_y_continuous(labels=(lambda value: f"{value:.2f}")) +
+            scale_y_continuous(labels=(lambda values: [f"{value:.2f}" for value in values])) +
             themes.theme_bw()
     )
 
