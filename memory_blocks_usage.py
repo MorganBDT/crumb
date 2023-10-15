@@ -10,7 +10,7 @@ import pandas as pd
 from dataloaders import datasets
 from torchvision import transforms
 import agents
-from plotnine import ggplot, aes, geom_bar, geom_col, geom_errorbar, geom_errorbarh, labs, themes, ggsave
+from plotnine import ggplot, aes, geom_bar, geom_col, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave
 
 
 def set_seed(seed):
@@ -170,6 +170,10 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = torch.stack([frequencies.float().mean() for frequencies in frequencies_per_example])
     std_dev = torch.stack([frequencies.float().std() for frequencies in frequencies_per_example])
 
+    total_count = flattened.numel()
+    mean_frequencies = mean_frequencies / total_count
+    std_dev = std_dev / total_count
+
     sorted_indices = torch.argsort(mean_frequencies, descending=True)
     mean_frequencies = mean_frequencies[sorted_indices]
     std_dev = std_dev[sorted_indices]
@@ -186,6 +190,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             geom_bar(stat='identity', fill='blue') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.5) +
             labs(x='memory block index', y='frequency') +
+            scale_y_log10() +
             themes.theme_bw()
     )
 
