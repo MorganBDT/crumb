@@ -10,7 +10,7 @@ import pandas as pd
 from dataloaders import datasets
 from torchvision import transforms
 import agents
-from plotnine import ggplot, aes, geom_bar, geom_errorbar, labs, themes, ggsave
+from plotnine import ggplot, aes, geom_bar, geom_col, geom_errorbarh, labs, themes, ggsave
 
 
 def set_seed(seed):
@@ -170,6 +170,10 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = torch.stack([frequencies.float().mean() for frequencies in frequencies_per_example])
     std_dev = torch.stack([frequencies.float().std() for frequencies in frequencies_per_example])
 
+    sorted_indices = torch.argsort(mean_frequencies, descending=True)
+    mean_frequencies = mean_frequencies[sorted_indices]
+    std_dev = std_dev[sorted_indices]
+
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
         'memory block index': torch.arange(args.n_memblocks).cpu().numpy(),
@@ -177,16 +181,24 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
         'std_dev': std_dev.cpu().numpy()
     })
 
-    # Plot using plotnine
+    # # Plot using plotnine
+    # plot = (
+    #         ggplot(df, aes(x='memory block index', y='frequency')) +
+    #         geom_bar(stat='identity', fill='blue') +
+    #         geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.5) +
+    #         labs(x='memory block index', y='frequency') +
+    #         themes.theme_bw()
+    # )
+
     plot = (
-            ggplot(df, aes(x='memory block index', y='frequency')) +
-            geom_bar(stat='identity', fill='blue') +
-            geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.5) +
-            labs(x='memory block index', y='frequency') +
+            ggplot(df, aes(y='memory block index', x='frequency')) +
+            geom_col(position='identity', fill='blue') +
+            geom_errorbarh(aes(xmin='frequency-std_dev', xmax='frequency+std_dev'), height=0.5) +
+            labs(y='memory block index', x='frequency') +
             themes.theme_bw()
     )
 
-    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=12, height=4, dpi=300)
+    ggsave(plot, filename="./" + args.dataset + "_mem_usage.png", width=12, height=4, dpi=1200)
 
     return None
 
