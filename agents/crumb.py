@@ -249,6 +249,15 @@ class Crumb(nn.Module):
         
     # update storage for reading attention and least memory usage indices based after each epoch
     def updateStorage_epoch(self, train_loader, run, task, img_skip=5):
+
+        if self.config["adaptive_storage"]:
+            print("N =", len(train_loader))
+            img_skip = math.floor((len(train_loader)/self.config["memory_size"]) * (len(self.active_out_nodes)/self.config["n_class"]))
+            if img_skip < 1:
+                img_skip = 1
+            if self.config["var_mem_cap_ablation"] and img_skip > 5:
+                img_skip = 5
+
         self.net.evalModeOn()       
         print('=====================Storing replay examples=====================')
         avgSampleNum = math.floor(self.capacity/len(self.active_out_nodes))
@@ -302,6 +311,10 @@ class Crumb(nn.Module):
 
                 # Pop out old examples (queue). Stored examples from old classes need to make space for new classes
                 if cls in self.memory_storage and self.memory_storage[cls].size(0) >= avgSampleNum:
+                    if self.config["adaptive_storage"] and not self.config["var_mem_cap_ablation"]:
+                        # In "adaptive storage", shuffle the storage of each class to ensure iid removal of examples
+                        perm = torch.randperm(self.memory_storage[cls].size(0))
+                        self.memory_storage[cls] = self.memory_storage[cls][perm]
                     self.memory_storage[cls] = self.memory_storage[cls][(self.memory_storage[cls].size(0) - avgSampleNum):, :]
                 else:
                     all_classes_full = False

@@ -100,6 +100,8 @@ def run(args, run, task_range=None):
         'pretrained_dataset_no_of_classes': args.pretrained_dataset_no_of_classes,
         'pretraining': args.pretraining,
         'continuing': args.continuing,
+        'var_mem_cap_ablation': args.var_mem_cap_ablation,
+        'adaptive_storage': args.adaptive_storage,
         'full_out_dir': get_out_path(args)
         }
 
@@ -521,6 +523,8 @@ def get_args(argv):
     parser.add_argument('--replay_in_1st_task', default=False, action='store_true', dest='replay_in_1st_task')
     parser.add_argument('--augment_replays', default=False, action='store_true', dest='augment_replays', help='Do data augmentation (e.g. random horizontal flip) on replay examples')
     parser.add_argument('--use_random_resize_crops', default=False, action='store_true', dest='use_random_resize_crops', help='Apply REMINDs feature-level data augmentation')
+    parser.add_argument('--adaptive_storage', default=False, action='store_true', dest='adaptive_storage', help='adaptive storage mode')
+    parser.add_argument('--var_mem_cap_ablation', default=False, action='store_true', dest='var_mem_cap_ablation', help='specifically for var_mem_cap experiment')
 
     # for CRUMB model
     parser.add_argument('--n_memblocks', type=int, default=256, help="Number of memory blocks to keep in memory")
