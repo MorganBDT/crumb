@@ -265,8 +265,6 @@ class Crumb(nn.Module):
         img_skip = math.floor((len(train_loader) / self.config["memory_size"]) * (len(self.active_out_nodes) / self.config["n_class"]))
         if img_skip < 1:
             img_skip = 1
-        if self.config["var_mem_cap_ablation"] and img_skip > 5:
-            img_skip = 5
 
         raw_feature_maps_save = []
         reconstr_feature_maps_save = []
