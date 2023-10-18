@@ -493,10 +493,10 @@ class Crumb(nn.Module):
             #classification loss
             loss_classiout = self.criterion_classi(output_logits, target)
             loss_classidir = self.criterion_classi(direct_logits, target)
-            if self.config['pretraining']:
+            if self.config['pretraining'] or self.config['plus_direct_loss']:
                 loss = loss_classiout + loss_classidir
             else:
-                if self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]:
+                if (self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]) or self.config['direct_loss_only']:
                     loss = (0*loss_classiout) + loss_classidir
                 else:
                     loss = loss_classiout + (0*loss_classidir)

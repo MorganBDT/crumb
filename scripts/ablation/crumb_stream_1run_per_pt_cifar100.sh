@@ -3,38 +3,52 @@
 
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
-MEMORY_SIZE="${3:-200}"
-PRETRAIN_DIR="${4:-"imagenet_pretrain_distmatch_sparse"}"
-SUFFIX="${5:-"memcap_${MEMORY_SIZE}"}"
-PRETRAIN_N_CLASSES="${6:-1000}"
-N_MEMBLOCKS="${7:-256}"
-MEMBLOCK_LENGTH="${8:-8}"
-LR=${9:-0.001}
+PRETRAIN_DIR="${3:-"cifar100_pretrain"}"
+SUFFIX="${4:-"cifar100_pretrain"}"
+PRETRAIN_N_CLASSES="${5:-100}"
+N_MEMBLOCKS="${6:-256}"
+MEMBLOCK_LENGTH="${7:-8}"
+LR=${8:-0.001}
 OUTDIR="${DATASET}_${SUFFIX}"
 
 if [ "$DATASET" = "core50" ]; then
     #DATAROOT="./data/core50"
     DATAROOT="/media/KLAB37/datasets/Core50"
+    MEMORY_SIZE=200
     BATCH_SIZE=21
     N_EPOCH_FIRST_TASK=10
 elif [ "$DATASET" = "toybox" ]; then
     #DATAROOT="./data/toybox/images"
     DATAROOT="/media/KLAB37/datasets/toybox/images"
+    MEMORY_SIZE=200
     BATCH_SIZE=21
     N_EPOCH_FIRST_TASK=10
 elif [ "$DATASET" = "ilab2mlight" ]; then
     #DATAROOT="./data/iLab-2M-Light/train_img_distributed"
     DATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light/train_img_distributed"
+    MEMORY_SIZE=200
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "ilab2mlight+core50" ]; then
+    DATAROOT="/media/KLAB37/datasets/"
+    MEMORY_SIZE=400
+    BATCH_SIZE=21
+    N_EPOCH_FIRST_TASK=10
+elif [ "$DATASET" = "icubworldtransf" ]; then
+    DATAROOT="/media/KLAB37/datasets/icubworldtransf_sparse"
+    MEMORY_SIZE=400
     BATCH_SIZE=21
     N_EPOCH_FIRST_TASK=10
 elif [ "$DATASET" = "cifar100" ]; then
     #DATAROOT="./data/cifar100"
     DATAROOT="/media/KLAB37/datasets/cifar100"
-    BATCH_SIZE=21
+    MEMORY_SIZE=2000
+    BATCH_SIZE=128
     N_EPOCH_FIRST_TASK=10
 elif [ "$DATASET" = "imagenet" ]; then
     #DATAROOT="/n/groups/kreiman/shared_data/Imagenet2012"
     DATAROOT="/media/KLAB37/datasets/ImageNet2012"
+    MEMORY_SIZE=139171
     BATCH_SIZE=128
     N_EPOCH_FIRST_TASK=15
 else
@@ -46,7 +60,7 @@ RUNS=(0 1 2 3 4)
 for RUN in "${RUNS[@]}"; do
     mkdir -p "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"
     mkdir -p "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"
-    weights_path=./"$PRETRAIN_DIR"/iid/Crumb_SqueezeNet_offline/runs-"$RUN"/CRUMB_run"$RUN"
+    weights_path=./"$PRETRAIN_DIR"/iid/Crumb_SqueezeNet_offline/runs-"$RUN"/CRUMB_run"$RUN"_task0_epoch3
 
     python -u experiment_aug.py --scenario class_iid      --save_model --specific_runs $RUN --n_epoch_first_task $N_EPOCH_FIRST_TASK --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks "$N_MEMBLOCKS" --memblock_length "$MEMBLOCK_LENGTH" --pretrained_dataset_no_of_classes "$PRETRAIN_N_CLASSES" --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size $BATCH_SIZE --n_workers 8 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --lr "$LR" --memory_size "$MEMORY_SIZE" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_iid/Crumb_SqueezeNet/runs-"$RUN"/log.log
     python -u experiment_aug.py --scenario class_instance --save_model --specific_runs $RUN --n_epoch_first_task $N_EPOCH_FIRST_TASK --n_epoch 1 --replay_times 1 --replay_coef 5 --n_memblocks "$N_MEMBLOCKS" --memblock_length "$MEMBLOCK_LENGTH" --pretrained_dataset_no_of_classes "$PRETRAIN_N_CLASSES" --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb --momentum 0.9 --weight_decay 0.0001 --batch_size $BATCH_SIZE --n_workers 8 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --lr "$LR" --memory_size "$MEMORY_SIZE" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/class_instance/Crumb_SqueezeNet/runs-"$RUN"/log.log
