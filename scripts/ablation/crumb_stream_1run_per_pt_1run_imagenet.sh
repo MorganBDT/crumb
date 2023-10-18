@@ -14,7 +14,7 @@ OUTDIR="${DATASET}_Crumb_outputs${SUFFIX}"
 if [ "$DATASET" = "imagenet" ]; then
     #DDATAROOT="./data/imagenet"
     DDATAROOT="/media/KLAB37/datasets/ImageNet2012"
-    MEMORY_SIZE=278342
+    MEMORY_SIZE=139171
     BATCH_SIZE=128
 else
     echo "Invalid dataset name!"
