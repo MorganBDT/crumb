@@ -3,7 +3,7 @@
 
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
-PRETRAIN_DIR="${3:-"imagenet_pretrain"}"
+PRETRAIN_DIR="${3:-"imagenet_pretrain_distmatch_sparse"}"
 SUFFIX="${4:-"quarter_mem_cap"}"
 PRETRAIN_N_CLASSES="${5:-1000}"
 LR=${6:-0.001}
