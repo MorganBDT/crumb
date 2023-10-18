@@ -9,19 +9,19 @@ OUTDIR="${DATASET}_${SUFFIX}"
 
 if [ "$DATASET" = "core50" ]; then
     #DATAROOT="./data/core50"
-    DATAROOT="/media/data/Datasets/Core50"
+    DATAROOT="/media/KLAB37/datasets/Core50"
     MEMORY_SIZE=200
 elif [ "$DATASET" = "toybox" ]; then
     #DATAROOT="./data/toybox/images"
-    DATAROOT="/media/data/morgan_data/toybox/images"
+    DATAROOT="/media/KLAB37/datasets/toybox/images"
     MEMORY_SIZE=200
 elif [ "$DATASET" = "ilab2mlight" ]; then
     #DATAROOT="./data/iLab-2M-Light/train_img_distributed"
-    DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
+    DATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light/train_img_distributed"
     MEMORY_SIZE=200
 elif [ "$DATASET" = "cifar100" ]; then
     #DATAROOT="./data/cifar100"
-    DATAROOT="/media/data/morgan_data/cifar100"
+    DATAROOT="/media/KLAB37/datasets/cifar100"
     MEMORY_SIZE=2000
 else
     echo "Invalid dataset name!"

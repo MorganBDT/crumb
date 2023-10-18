@@ -13,7 +13,7 @@ OUTDIR="./ablation_study/${DATASET}_${ABLATION_NAME}"
 
 if [ "$DATASET" = "cifar100" ]; then
     #DATAROOT="./data/cifar100"
-    DATAROOT="/media/data/morgan_data/cifar100"
+    DATAROOT="/media/KLAB37/datasets/cifar100"
     NCLASS=100
     SCENARIOS=("iid")
 elif [ "$DATASET" = "imagenet" ]; then

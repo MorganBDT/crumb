@@ -12,15 +12,15 @@ memory_size=${7:-0} # Meaningless in pretraining (all replay operations skipped)
 RUNS_STR=$(echo "${RUN}" | sed 's/ /-/g') # If "RUN" is formatted like "0 1 2", replace spaces with dashes
 OUTDIR="${DATASET}_pretrain_16_augmem_feat_run${RUNS_STR}"
 if [ "$DATASET" = "core50" ]; then
-    DDATAROOT="/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50"
+    DDATAROOT="/media/KLAB37/datasets/Core50"
 elif [ "$DATASET" = "toybox" ]; then
-    DDATAROOT="/media/data/morgan_data/toybox/images"
+    DDATAROOT="/media/KLAB37/datasets/toybox/images"
 elif [ "$DATASET" = "ilab2mlight" ]; then
-    DDATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light"
+    DDATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light"
 elif [ "$DATASET" = "cifar100" ]; then
-    DDATAROOT="/home/rushikesh/P1_Oct/cifar100/cifar100png"
+    DDATAROOT="/media/KLAB37/datasets/cifar100"
 elif [ "$DATASET" = "imagenet" ]; then
-    #DDATAROOT="/media/data/Datasets/ImageNet2012"
+    #DDATAROOT="/media/KLAB37/datasets/ImageNet2012"
     DDATAROOT="/n/groups/kreiman/shared_data/Imagenet2012_temp_copy"
 else
     echo "Invalid dataset name!"
