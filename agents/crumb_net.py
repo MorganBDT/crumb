@@ -91,7 +91,7 @@ class Net(nn.Module):
             # 7x7 (spatially) feature maps. This roughly preserves the 2/7 ratio for other square feature map sizes.
             self.random_resize_crop = RandomResizeCrop(self.origsz, scale=(int(round(self.origsz*(2.0/7.0))) / self.origsz, 1.0))
 
-        if self.config["storage_type"] in ["image", "raw_feature"] or (self.config["pretrained_weights"] and self.config["memory_weights"] is not None):
+        if self.config["storage_type"] in ["image", "raw_feature", "merec"] or (self.config["pretrained_weights"] and self.config["memory_weights"] is not None):
             # PretrainedCRUMB matrix will be used, initialize to zeros (to be replaced)
             print("InitializingCRUMB to all zeros")
             mem_init_strat = "zeros"
@@ -114,6 +114,7 @@ class Net(nn.Module):
 
         self.crumbr = CrumbReconstructor(self.compressedChannel, self.origsz, self.origsz, mem_init=mem_init_strat,
                                          n_memblocks=self.config['n_memblocks'], memblock_length=self.config['memblock_length'], fbanks_std=fbanks_std, fbanks_sparsity=fbanks_sparsity)
+
         if self.config['freeze_memory']:
             self.crumbr.memory.requires_grad = False
         else:
@@ -212,7 +213,7 @@ class Net(nn.Module):
                 mem_stats = self.crumbr.mem_stats(extracted, read)
             else:
                 mem_stats = None
-        elif storage_type in ["image", "raw_feature", "enhanced_raw_feature"]:
+        elif storage_type in ["image", "raw_feature", "enhanced_raw_feature", "merec"]:
             crumb_logits = direct_logits
             mem_stats = None
         else:
@@ -228,7 +229,7 @@ class Net(nn.Module):
             storage_1_example_per_row = self.crumbr.top1_inds_to_replay_storage(self.crumbr.fbank_to_top1_inds(extracted))
         elif storage_type == "image":
             storage_1_example_per_row = image_batch.view(image_batch.size(0), -1)
-        elif storage_type == "raw_feature":
+        elif storage_type in ["raw_feature", "merec"]:
             storage_1_example_per_row = extracted.view(extracted.size(0), -1)
         else:
             raise ValueError("Invalid 'storage_type': " + str(storage_type))
