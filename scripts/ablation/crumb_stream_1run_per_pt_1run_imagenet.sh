@@ -6,7 +6,7 @@ LR=${5:-0.001}
 PRETRAIN_RUN="${6:-0}"
 PRETRAIN_DIR="${7:-"imagenet_pretrain_distmatch_sparse"}"
 N_MEMBLOCKS="${8:-256}"
-MEMBLOCK_LENGTH="${9:-16}"
+MEMBLOCK_LENGTH="${9:-8}"
 PRETRAIN_N_CLASSES="${10:-1000}"
 
 OUTDIR="${DATASET}_Crumb_outputs${SUFFIX}"
