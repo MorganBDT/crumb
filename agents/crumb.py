@@ -162,11 +162,11 @@ class Crumb(nn.Module):
         replay_labels = [cls for cls in self.active_out_nodes
                          if cls not in labelslist and cls in self.memory_storage.keys()]
         replay_batchsize = len(replay_labels)
-        print("REPLAY BATCH SIZE: " + str(replay_batchsize))
         
         if replay_batchsize > 0:
             
             replaytimes = math.ceil(len(labelslist)/replay_batchsize)
+            print("REPLAY BATCH SIZE: " + str(replaytimes * replay_batchsize))
             replay_examples_list = []
 
             # find corresponding memory block indices for replaying classes
