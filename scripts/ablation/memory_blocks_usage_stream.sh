@@ -43,7 +43,7 @@ else
     exit
 fi
 
-SCENARIOS=("class_iid")
+SCENARIOS=("class_instance")
 RUNS=(0)
 for scenario in "${SCENARIOS[@]}"; do
   for run in "${RUNS[@]}"; do
