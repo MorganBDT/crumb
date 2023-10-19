@@ -10,7 +10,7 @@ import pandas as pd
 from dataloaders import datasets
 from torchvision import transforms
 import agents
-from plotnine import ggplot, aes, geom_bar, geom_col, geom_text, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
+from plotnine import ggplot, aes, geom_bar, geom_col, geom_segment, arrow, geom_text, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
 
 
 def set_seed(seed):
@@ -199,6 +199,8 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             #geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
             geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds.numpy()[0]), va='bottom', nudge_y=0.00001,
                       size=6) +
+            geom_segment(aes(x=label_positions[0], xend=label_positions[0], y=label_frequencies[0] + 0.000008, yend=label_frequencies[0] + 0.000002),
+                         arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
             labs(x='memory block index', y='frequency') +
             themes.theme_bw()
     )
