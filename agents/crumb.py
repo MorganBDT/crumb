@@ -102,7 +102,7 @@ class Crumb(nn.Module):
                     if self.config["crumb_cut_layer"] == 12:
                         net.block[1][1] = nn.Conv2d(net.compressedChannel, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
                     elif self.config["crumb_cut_layer"] == 3:
-                        net.block[-2][1] = nn.Conv2d(net.compressedChannel, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
+                        net.block[-2][1] = nn.Conv2d(512, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
                     else:
                         print("Figure out where in the model you need to make your classification layer")
                         raise NotImplementedError
