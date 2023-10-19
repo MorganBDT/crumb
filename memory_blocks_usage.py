@@ -182,7 +182,6 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = mean_frequencies[sorted_indices]
     std_dev = std_dev[sorted_indices]
 
-    print(sorted_indices)
     sorted_indices = sorted_indices.cpu()
     # label_positions = (sorted_indices.cpu().numpy()[:, None] == label_inds).nonzero(as_tuple=True)[0]
     label_positions = torch.tensor([torch.where(sorted_indices == x)[0] for x in label_inds]).squeeze()
@@ -198,7 +197,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             ggplot(df, aes(x='memory block index', y='frequency')) +
             geom_bar(stat='identity', fill='red') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
-            geom_text(aes(x=label_positions, y=label_frequencies, label=label_inds), va='bottom', nudge_y=0.02,
+            geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds[0]), va='bottom', nudge_y=0.02,
                       size=10) +
             labs(x='memory block index', y='frequency') +
             themes.theme_bw()
