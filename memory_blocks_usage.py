@@ -10,7 +10,7 @@ import pandas as pd
 from dataloaders import datasets
 from torchvision import transforms
 import agents
-from plotnine import ggplot, aes, geom_bar, geom_col, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
+from plotnine import ggplot, aes, geom_bar, geom_col, geom_text, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
 
 
 def set_seed(seed):
@@ -175,9 +175,14 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = mean_frequencies / total_count
     std_dev = std_dev / total_count
 
+    label_inds = torch.tensor([32, 201, 197])
+    label_frequencies = mean_frequencies[label_inds]
+
     sorted_indices = torch.argsort(mean_frequencies, descending=True)
     mean_frequencies = mean_frequencies[sorted_indices]
     std_dev = std_dev[sorted_indices]
+
+    label_positions = (sorted_indices[:, None] == label_inds).nonzero(as_tuple=True)[0]
 
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
@@ -190,6 +195,8 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             ggplot(df, aes(x='memory block index', y='frequency')) +
             geom_bar(stat='identity', fill='red') +
             geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
+            geom_text(aes(x=label_positions, y=label_frequencies, label=label_inds), va='bottom', nudge_y=0.02,
+                      size=10) +
             labs(x='memory block index', y='frequency') +
             themes.theme_bw()
     )
