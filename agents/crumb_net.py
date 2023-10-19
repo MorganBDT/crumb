@@ -41,9 +41,9 @@ class Net(nn.Module):
 
             if self.pretrained_weights and self.config["model_weights"] is not None:
                 no_of_classes = self.pretrained_dataset_no_of_classes
-                self.model.classifier[1] = nn.Conv2d(self.compressedChannel, no_of_classes, (3, 3), stride=(1, 1), padding=(1, 1))
+                self.model.classifier[1] = nn.Conv2d(512, no_of_classes, (3, 3), stride=(1, 1), padding=(1, 1))
             else:
-                self.model.classifier[1] = nn.Conv2d(self.compressedChannel, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
+                self.model.classifier[1] = nn.Conv2d(512, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
             # freezing weights for feature extraction if desired
             for param in self.model.parameters():
                 param.requires_grad = True
