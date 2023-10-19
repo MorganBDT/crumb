@@ -176,13 +176,13 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     std_dev = std_dev / total_count
 
     label_inds = torch.tensor([32, 201, 197])
-    label_frequencies = mean_frequencies[label_inds]
+    label_frequencies = mean_frequencies[label_inds].cpu().numpy()
 
     sorted_indices = torch.argsort(mean_frequencies, descending=True)
     mean_frequencies = mean_frequencies[sorted_indices]
     std_dev = std_dev[sorted_indices]
 
-    label_positions = (sorted_indices[:, None] == label_inds).nonzero(as_tuple=True)[0]
+    label_positions = (sorted_indices.cpu().numpy()[:, None] == label_inds).nonzero(as_tuple=True)[0]
 
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({

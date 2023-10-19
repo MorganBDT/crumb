@@ -9,7 +9,7 @@ N_MEMBLOCKS=${4:-256}
 MEMBLOCK_LENGTH=${5:-8}
 cut_layer=${6:-12}
 model_name=${7:-"SqueezeNet"}
-OUTDIR="./ablation_study/${DATASET}_${ABLATION_NAME}"
+OUTDIR="./ablation_study/${DATASET}_unablated"
 
 if [ "$DATASET" = "core50" ]; then
     #DATAROOT="./data/core50"
@@ -48,6 +48,6 @@ RUNS=(0)
 for scenario in "${SCENARIOS[@]}"; do
   for run in "${RUNS[@]}"; do
     weights_path=$EXP_PATH/$scenario/Crumb_"$model_name"/runs-"$run"/CRUMB_run"$run"
-    python -u memory_blocks_usage.py --scenario $scenario --visualize --specific_runs $run --n_memblocks "$N_MEMBLOCKS" --memblock_length "$MEMBLOCK_LENGTH" --crumb_cut_layer $cut_layer --model_type squeezenet --model_name "$model_name" --pretrained --agent_type crumb --agent_name Crumb --batch_size 100 --n_workers 0 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --pretrained_dataset_no_of_classes "$NCLASS" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR" | tee "$OUTDIR"/"$scenario"/Crumb_"$model_name"/runs-"$run"/shape_bias_log.log
+    python -u memory_blocks_usage.py --scenario $scenario --visualize --specific_runs $run --n_memblocks "$N_MEMBLOCKS" --memblock_length "$MEMBLOCK_LENGTH" --crumb_cut_layer $cut_layer --model_type squeezenet --model_name "$model_name" --pretrained --agent_type crumb --agent_name Crumb --batch_size 100 --n_workers 0 --pretrained_weights --model_weights "$weights_path" --memory_weights "$weights_path" --pretrained_dataset_no_of_classes "$NCLASS" --gpuid "$GPU" --dataset "$DATASET" --dataroot "$DATAROOT"  --output_dir "$OUTDIR"
   done
 done
