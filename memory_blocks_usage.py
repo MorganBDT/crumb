@@ -197,10 +197,8 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             ggplot(df, aes(x='memory block index', y='frequency')) +
             geom_bar(stat='identity', fill='red') +
             #geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
-            geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds.numpy()[0]), va='bottom', nudge_y=0.00001,
-                      size=6) +
-            geom_segment(aes(x=label_positions[0], xend=label_positions[0], y=label_frequencies[0] + 0.000008, yend=label_frequencies[0] + 0.000002),
-                         arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds.numpy()[0]), va='bottom', nudge_y=0.00001, size=12, color='red') +
+            geom_segment(aes(x=label_positions[0], xend=label_positions[0], y=label_frequencies[0] + 0.000009, yend=label_frequencies[0] + 0.000001), arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
             labs(x='memory block index', y='frequency') +
             themes.theme_bw()
     )
