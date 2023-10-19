@@ -1,5 +1,5 @@
 # Example usage:
-# ./scripts/ablation/crumb_stream_1run_per_pt.sh core50 0 imagenet_pretrain_3-30-2022 everyperm
+# ./scripts/ablation/crumb_stream_1run_per_pt.sh core50 0 imagenet_pretrain_3-30-2022 my_pretrain_ablation
 
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
