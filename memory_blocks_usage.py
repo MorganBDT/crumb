@@ -164,7 +164,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     all_mem_inds = torch.cat(mem_inds_batches, dim=0)
 
-    all_mem_inds = all_mem_inds[:, :, :, 0]
+    #all_mem_inds = all_mem_inds[:, :, :, 0]
 
     flattened = all_mem_inds.view(all_mem_inds.size(0), -1)
 
