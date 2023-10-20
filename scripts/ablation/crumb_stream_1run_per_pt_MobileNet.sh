@@ -4,7 +4,7 @@
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
 PRETRAIN_DIR="${3:-"imagenet_pretrain_MobileNet_normal"}"
-SUFFIX="${4:-""}"
+SUFFIX="${4:-"MobileNet"}"
 PRETRAIN_N_CLASSES="${5:-1000}"
 LR=${6:-0.001}
 OUTDIR="${DATASET}_${SUFFIX}"
