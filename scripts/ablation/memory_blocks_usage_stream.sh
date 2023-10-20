@@ -4,7 +4,7 @@
 
 DATASET="${1:-"core50"}"
 GPU="${2:-0}"
-EXP_PATH=${3:-"./${DATASET}_unablated"}
+EXP_PATH=${3:-"./${DATASET}_unablated_VIZ"}
 N_MEMBLOCKS=${4:-256}
 MEMBLOCK_LENGTH=${5:-8}
 cut_layer=${6:-12}
