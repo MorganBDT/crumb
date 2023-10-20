@@ -10,7 +10,7 @@ import pandas as pd
 from dataloaders import datasets
 from torchvision import transforms
 import agents
-from plotnine import ggplot, aes, geom_bar, geom_col, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
+from plotnine import ggplot, aes, geom_bar, geom_col, geom_segment, arrow, geom_text, geom_errorbar, geom_errorbarh, scale_y_log10, labs, themes, ggsave, scale_y_continuous
 
 
 def set_seed(seed):
@@ -164,6 +164,8 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     all_mem_inds = torch.cat(mem_inds_batches, dim=0)
 
+    #all_mem_inds = all_mem_inds[:, :, :, 0]
+
     flattened = all_mem_inds.view(all_mem_inds.size(0), -1)
 
     frequencies_per_example = [(flattened == i).sum(dim=1) for i in range(args.n_memblocks)]
@@ -175,9 +177,17 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = mean_frequencies / total_count
     std_dev = std_dev / total_count
 
+    label_inds = torch.tensor([32, 205, 197])
+    colors = ['blue', 'red', '#f5c542']
+    label_frequencies = mean_frequencies[label_inds].cpu().numpy()
+
     sorted_indices = torch.argsort(mean_frequencies, descending=True)
     mean_frequencies = mean_frequencies[sorted_indices]
     std_dev = std_dev[sorted_indices]
+
+    sorted_indices = sorted_indices.cpu()
+    # label_positions = (sorted_indices.cpu().numpy()[:, None] == label_inds).nonzero(as_tuple=True)[0]
+    label_positions = torch.tensor([torch.where(sorted_indices == x)[0] for x in label_inds]).squeeze().cpu().numpy()
 
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
@@ -188,8 +198,15 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
 
     plot = (
             ggplot(df, aes(x='memory block index', y='frequency')) +
-            geom_bar(stat='identity', fill='red') +
-            geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
+            geom_bar(stat='identity', fill='black') +
+            #geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
+            geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds.numpy()[0]), va='bottom', nudge_x=3, nudge_y=0.00001, size=12) +
+            geom_segment(aes(x=label_positions[0], xend=label_positions[0], y=label_frequencies[0] + 0.000009, yend=label_frequencies[0] + 0.000001), size=1.5, color=colors[0], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[1], y=label_frequencies[1], label=label_inds.numpy()[1]), va='bottom', nudge_y=0.00001, size=12) +
+            geom_segment(aes(x=label_positions[1], xend=label_positions[1], y=label_frequencies[1] + 0.000009, yend=label_frequencies[1] + 0.000001), size=1.5, color=colors[1], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[2], y=label_frequencies[2], label=label_inds.numpy()[2]), va='bottom', nudge_y=0.00001, size=12) +
+            geom_segment(aes(x=label_positions[2], xend=label_positions[2], y=label_frequencies[2] + 0.000009, yend=label_frequencies[2] + 0.000001), size=1.5, color=colors[2], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_segment(aes(x=256, xend=256, y=0.00001, yend=0), color='black', linetype='dashed') +
             labs(x='memory block index', y='frequency') +
             themes.theme_bw()
     )
