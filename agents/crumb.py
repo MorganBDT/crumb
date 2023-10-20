@@ -267,7 +267,7 @@ class Crumb(nn.Module):
         self.net.evalModeOn()       
         print('=====================Storing replay examples=====================')
         avgSampleNum = math.floor(self.capacity/len(self.active_out_nodes))
-
+        print(len(train_loader))
         img_skip = math.floor((len(train_loader) / self.config["memory_size"]) * (len(self.active_out_nodes) / self.config["n_class"]))
         if img_skip < 1:
             img_skip = 1
