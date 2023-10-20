@@ -268,6 +268,7 @@ class Crumb(nn.Module):
         print('=====================Storing replay examples=====================')
         avgSampleNum = math.floor(self.capacity/len(self.active_out_nodes))
         img_skip = math.floor(( ((len(train_loader)-1)*self.config["batch_size"]) / self.config["memory_size"])) # * (len(self.active_out_nodes) / self.config["n_class"]))
+        print("EST IMAGES:", (len(train_loader)-1)*self.config["batch_size"])
         print("IMG_SKIP:", img_skip)
         if img_skip < 1:
             img_skip = 1
