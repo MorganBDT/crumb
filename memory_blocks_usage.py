@@ -189,6 +189,9 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     # label_positions = (sorted_indices.cpu().numpy()[:, None] == label_inds).nonzero(as_tuple=True)[0]
     label_positions = torch.tensor([torch.where(sorted_indices == x)[0] for x in label_inds]).squeeze().cpu().numpy()
 
+    print("HEIGHT OF HEIGHEST BAR:", mean_frequencies[0])
+    mean_frequencies[0] = 0
+
     # Convert the tensor data to a Pandas DataFrame
     df = pd.DataFrame({
         'memory block index': torch.arange(args.n_memblocks).cpu().numpy(),
@@ -200,15 +203,16 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             ggplot(df, aes(x='memory block index', y='frequency')) +
             geom_bar(stat='identity', fill='black') +
             #geom_errorbar(aes(ymin='frequency-std_dev', ymax='frequency+std_dev'), width=0.25) +
-            geom_text(aes(x=label_positions[0], y=label_frequencies[0], label=label_inds.numpy()[0]), va='bottom', nudge_x=3, nudge_y=0.00001, size=12) +
-            geom_segment(aes(x=label_positions[0], xend=label_positions[0], y=label_frequencies[0] + 0.000009, yend=label_frequencies[0] + 0.000001), size=1.5, color=colors[0], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
-            geom_text(aes(x=label_positions[1], y=label_frequencies[1], label=label_inds.numpy()[1]), va='bottom', nudge_y=0.00001, size=12) +
-            geom_segment(aes(x=label_positions[1], xend=label_positions[1], y=label_frequencies[1] + 0.000009, yend=label_frequencies[1] + 0.000001), size=1.5, color=colors[1], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
-            geom_text(aes(x=label_positions[2], y=label_frequencies[2], label=label_inds.numpy()[2]), va='bottom', nudge_y=0.00001, size=12) +
-            geom_segment(aes(x=label_positions[2], xend=label_positions[2], y=label_frequencies[2] + 0.000009, yend=label_frequencies[2] + 0.000001), size=1.5, color=colors[2], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_segment(aes(x=0, xend=0, y=0, yend=0.00002),
+                         arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[0]+15, y=label_frequencies[0], label=label_inds.numpy()[0]), color=colors[0], va='bottom', nudge_x=3, nudge_y=0.000005, size=12) +
+            geom_segment(aes(x=label_positions[0]+15, xend=label_positions[0], y=label_frequencies[0] + 0.000005, yend=label_frequencies[0] + 0.0000005), size=1, color=colors[0], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[1], y=label_frequencies[1], label=label_inds.numpy()[1]), color=colors[1], va='bottom', nudge_y=0.000005, size=12) +
+            geom_segment(aes(x=label_positions[1], xend=label_positions[1], y=label_frequencies[1] + 0.000005, yend=label_frequencies[1] + 0.0000005), size=1, color=colors[1], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
+            geom_text(aes(x=label_positions[2], y=label_frequencies[2], label=label_inds.numpy()[2]), color=colors[2], va='bottom', nudge_y=0.000005, size=12) +
+            geom_segment(aes(x=label_positions[2], xend=label_positions[2], y=label_frequencies[2] + 0.000005, yend=label_frequencies[2] + 0.0000005), size=1, color=colors[2], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
             geom_segment(aes(x=256, xend=256, y=0.00001, yend=0), color='black', linetype='dashed') +
             labs(x='memory block index', y='frequency') +
-            coord_trans(y="log10") +
             themes.theme_bw()
     )
 
