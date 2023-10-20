@@ -570,7 +570,8 @@ class iCARL(NormalNN):
             accs = accuracy(pred, target, metric_topk)
 
             for k_ind, k in enumerate(metric_topk):
-                accs_avg[k].update(accs[k_ind], input.size(0))
+                if accs[k_ind] is not None:
+                    accs_avg[k].update(accs[k_ind], input.size(0))
 
         # stop storing features
         self.store_features = False  

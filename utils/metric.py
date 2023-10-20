@@ -13,9 +13,8 @@ def accuracy(output, target, topk=(1,)):
         try: 
             _, pred = output.topk(k=maxk, dim=1, largest=True, sorted=True)
         except IndexError as e:
-            print("OUTPUT SIZE")
-            print(output.size())
-            raise e
+            print("ANOMALY! ignoring outputs of size:", output.size())
+            return [None for _ in topk]
             
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
