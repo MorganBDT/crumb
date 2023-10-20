@@ -564,8 +564,12 @@ class iCARL(NormalNN):
                     target = target.cuda()
                         
             pred = self.predict(input)
+
+            print(pred)
+            print(target)
                         
             # computing accuracy
+
             acc = 100 * float((pred == target).sum()) / target.shape[0]
             accs_avg[1].update(acc, input.size(0))
             if 5 in metric_topk:
