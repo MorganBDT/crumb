@@ -9,6 +9,8 @@ def accuracy(output, target, topk=(1,)):
         batch_size = target.size(0)
 
         # prediction vectors are stacked along the batch dimension (dim zero)
+        print("OUTPUT SIZE")
+        print(output.size())
         _, pred = output.topk(k=maxk, dim=1, largest=True, sorted=True)
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
