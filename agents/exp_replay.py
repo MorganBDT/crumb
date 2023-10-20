@@ -403,9 +403,6 @@ class iCARL(NormalNN):
             
         # otherwise use regular nn loss
         else:
-            print(pred.size())
-            print(target.size())
-            print("-------")
             loss = super(iCARL, self).criterion(pred, target)
             return loss
     
@@ -567,20 +564,13 @@ class iCARL(NormalNN):
                     target = target.cuda()
                         
             pred = self.predict(input)
-
-            print(pred.size())
-            print(target.size())
                         
             # computing accuracy
 
-            acc = 100 * float((pred == target).sum()) / target.shape[0]
-            accs_avg[1].update(acc, input.size(0))
-            if 5 in metric_topk:
-                raise NotImplementedError
+            accs = accuracy(pred, target, metric_topk)
 
-            # accs = accuracy(pred, target, metric_topk)
-            # for k_ind, k in enumerate(metric_topk):
-            #     accs_avg[k].update(accs[k_ind], input.size(0))
+            for k_ind, k in enumerate(metric_topk):
+                accs_avg[k].update(accs[k_ind], input.size(0))
 
         # stop storing features
         self.store_features = False  
