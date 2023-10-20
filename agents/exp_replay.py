@@ -566,11 +566,14 @@ class iCARL(NormalNN):
             pred = self.predict(input)
                         
             # computing accuracy
+            acc = 100 * float((pred == target).sum()) / target.shape[0]
+            accs_avg[1].update(acc, input.size(0))
+            if 5 in metric_topk:
+                raise NotImplementedError
 
-            accs = accuracy(pred, target, metric_topk)
-
-            for k_ind, k in enumerate(metric_topk):
-                accs_avg[k].update(accs[k_ind], input.size(0))
+            # accs = accuracy(pred, target, metric_topk)
+            # for k_ind, k in enumerate(metric_topk):
+            #     accs_avg[k].update(accs[k_ind], input.size(0))
 
         # stop storing features
         self.store_features = False  
