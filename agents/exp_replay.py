@@ -403,6 +403,9 @@ class iCARL(NormalNN):
             
         # otherwise use regular nn loss
         else:
+            print(pred)
+            print(target)
+            print("-------")
             loss = super(iCARL, self).criterion(pred, target)
             return loss
     
