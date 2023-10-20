@@ -208,6 +208,7 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             geom_segment(aes(x=label_positions[2], xend=label_positions[2], y=label_frequencies[2] + 0.000009, yend=label_frequencies[2] + 0.000001), size=1.5, color=colors[2], arrow=arrow(type='closed', angle=15, length=0.1, ends='last')) +
             geom_segment(aes(x=256, xend=256, y=0.00001, yend=0), color='black', linetype='dashed') +
             labs(x='memory block index', y='frequency') +
+            scale_y_log10() +
             themes.theme_bw()
     )
 
