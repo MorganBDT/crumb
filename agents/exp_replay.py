@@ -403,8 +403,8 @@ class iCARL(NormalNN):
             
         # otherwise use regular nn loss
         else:
-            print(pred)
-            print(target)
+            print(pred.size())
+            print(target.size())
             print("-------")
             loss = super(iCARL, self).criterion(pred, target)
             return loss
@@ -568,8 +568,8 @@ class iCARL(NormalNN):
                         
             pred = self.predict(input)
 
-            print(pred)
-            print(target)
+            print(pred.size())
+            print(target.size())
                         
             # computing accuracy
 
