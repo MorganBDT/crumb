@@ -562,9 +562,10 @@ class Crumb(nn.Module):
         # END of epoch train data
         # UPDATE storage of reading attention
         # UPDATE least used memory slot indices
-        if not self.config['pretraining']: # no need for storing replay examples during pretraining
+        if not self.config['pretraining']:  # no need for storing replay examples during pretraining
             if task > 0 or self.config['replay_in_1st_task'] or (task == 0 and epoch == self.config['n_epoch_first_task']-1):
-                self.updateStorage_epoch(train_loader, run, task)
+                if not task == self.config['ntask']-1:  # no need for storing replay examples after the last task
+                    self.updateStorage_epoch(train_loader, run, task)
 
         return mem_stats
 
