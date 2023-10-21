@@ -177,8 +177,8 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
     mean_frequencies = mean_frequencies / total_count
     std_dev = std_dev / total_count
 
-    label_inds = torch.tensor([32, 205, 197])
-    colors = ['blue', 'red', '#f5c542']
+    label_inds = torch.tensor([32, 205, 197, 48, 201])
+    colors = ['blue', 'red', '#f5c542', 'blue', 'red']
     label_frequencies = mean_frequencies[label_inds].cpu().numpy()
 
     sorted_indices = torch.argsort(mean_frequencies, descending=True)
@@ -211,6 +211,13 @@ def make_visualizations(agent, transforms, args, run, tasks, active_out_nodes, t
             geom_segment(aes(x=label_positions[1], xend=label_positions[1], y=label_frequencies[1] + 0.000005, yend=label_frequencies[1] + 0.0000005), size=1, color=colors[1], arrow=arrow(type='open', angle=20, length=0.1, ends='last')) +
             geom_text(aes(x=label_positions[2], y=label_frequencies[2], label=label_inds.numpy()[2]), color=colors[2], va='bottom', nudge_y=0.000005, size=12) +
             geom_segment(aes(x=label_positions[2], xend=label_positions[2], y=label_frequencies[2] + 0.000005, yend=label_frequencies[2] + 0.0000005), size=1, color=colors[2], arrow=arrow(type='open', angle=20, length=0.1, ends='last')) +
+            
+            geom_text(aes(x=label_positions[3], y=label_frequencies[3], label=label_inds.numpy()[3]), color=colors[3], va='bottom', nudge_y=0.000005, size=12) +
+            geom_segment(aes(x=label_positions[3], xend=label_positions[3], y=label_frequencies[3] + 0.000005, yend=label_frequencies[3] + 0.0000005), size=1, color=colors[3], arrow=arrow(type='open', angle=20, length=0.1, ends='last')) +
+            
+            geom_text(aes(x=label_positions[4], y=label_frequencies[4], label=label_inds.numpy()[4]), color=colors[4], va='bottom', nudge_y=0.000005, size=12) +
+            geom_segment(aes(x=label_positions[4], xend=label_positions[4], y=label_frequencies[4] + 0.000005, yend=label_frequencies[4] + 0.0000005), size=1, color=colors[4], arrow=arrow(type='open', angle=20, length=0.1, ends='last')) +
+            
             geom_segment(aes(x=256, xend=256, y=0.000005, yend=0), color='black', linetype='dashed') +
             labs(x='memory block index', y='frequency') +
             # scale_y_continuous(breaks=[0, 0.000005, 0.00001, 0.000015, 0.00002], labels=["0", "", "1e-5", "", "2e-5"]) +
