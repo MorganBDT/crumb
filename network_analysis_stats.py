@@ -89,7 +89,7 @@ for ablation in ablations:
 
     for scenario in scenarios:
         run_dfs = []
-        if "_1_memory_blocks" in ablation:
+        if ablation in ["1_memory_blocks", "1_memory_block"]:
             runs_to_do = 1
         else:
             runs_to_do = runs
