@@ -4,6 +4,7 @@ DATASET="${1:-"null"}" # E.g. core50, toybox, ilab2mlight, cifar100
 SCENARIO="${2:-"null"}" # E.g. class_iid, class_instance
 GPU="${3:-0}" # Default 0, include alternative GPU index as 1st argument to this script
 RUN="${4:-0}"
+LR="${5:-0.001}"
 
 if [ "$DATASET" = "core50" ]; then
     DATAROOT="/n/groups/kreiman/shared_data/core50"
@@ -79,8 +80,8 @@ CUDA_VISIBLE_DEVICES=${GPU} python -u non_imagenet_experiment.py \
 --class_increment ${CLASS_INCREMENT} \
 --classifier_ckpt ${BASE_INIT_CKPT} \
 --rehearsal_samples ${REPLAY_SAMPLES} \
---start_lr 0.001 \
---end_lr 0.001 \
+--start_lr $LR \
+--end_lr $LR \
 --lr_step_size 0 \
 --lr_mode constant \
 --weight_decay 1e-5 \
