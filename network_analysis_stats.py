@@ -104,10 +104,15 @@ for ablation in ablations:
                     + "/runs-" + str(run) + "/batchwise_accs_run" + str(run) + ".csv"))
 
         all_dfs[scenario][ablation] = pd.concat(run_dfs)
+        if ablation == control_scenario:
+            run0_df_control = run_dfs[0]
 
-        if not ablation == "unablated":
+        if not ablation == control_scenario:
             print(ablation + ", " + scenario + ":")
-            print(stats.ttest_rel(all_dfs[scenario][control_scenario]["accuracy"], all_dfs[scenario][ablation]["accuracy"]))
+            if ablation in ["1_memory_blocks", "1_memory_block"]:
+                print(stats.ttest_rel(run0_df_control, all_dfs[scenario][ablation]["accuracy"]))
+            else:
+                print(stats.ttest_rel(all_dfs[scenario][control_scenario]["accuracy"], all_dfs[scenario][ablation]["accuracy"]))
 
 
 
