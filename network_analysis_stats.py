@@ -67,9 +67,7 @@ if dataset == "core50":
 else:
     ablations = (
         "unablated",
-        "pretrained_image_replay",
         "stock_pretrain_image_replay",
-        "freeze_memory"
     )
 
 if dataset == "cifar100" or dataset == "imagenet":
