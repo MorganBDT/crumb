@@ -498,11 +498,16 @@ class Crumb(nn.Module):
             loss_classiout = self.criterion_classi(output_logits, target)
             loss_classidir = self.criterion_classi(direct_logits, target)
             if self.config['pretraining'] or self.config['plus_direct_loss']:
-                loss = loss_classiout + loss_classidir
+                if self.config['pt_only_codebook_out_loss']:
+                    # This is unablated CRUMB's loss during pretraining
+                    loss = loss_classiout + loss_classidir
+                else:
+                    loss = loss_classiout + (0*loss_classidir)
             else:
                 if (self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]) or self.config['direct_loss_only']:
                     loss = (0*loss_classiout) + loss_classidir
                 else:
+                    # This is unablated CRUMB's loss during stream learning
                     loss = loss_classiout + (0*loss_classidir)
 
             loss.backward()
