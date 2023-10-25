@@ -3,17 +3,18 @@
 DATASET="${1:-"core50"}"
 OUTDIR="${DATASET}_outputs"
 GPU="${2:-0}"
+LR="${3:-0.0001}"
 
 if [ "$DATASET" = "core50" ]; then
     DATAROOT="/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50"
 elif [ "$DATASET" = "toybox" ]; then
-    DATAROOT="/media/data/morgan_data/toybox/images"
+    DATAROOT="/media/KLAB37/datasets/toybox/images"
 elif [ "$DATASET" = "ilab2mlight" ]; then
-    #DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light"
+    #DATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light"
     #DATAROOT="/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/ilab/iLab-2M-Light/"
-    DATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light/train_img_distributed"
+    DATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light/train_img_distributed"
 elif [ "$DATASET" = "ilab2mlight+core50" ]; then
-    DATAROOT="/media/data/Datasets"
+    DATAROOT="/media/KLAB37/datasets/"
 elif [ "$DATASET" = "icubworldtransf" ]; then
     DATAROOT="/media/KLAB37/datasets/icubworldtransf_sparse"
 else
@@ -29,6 +30,6 @@ mkdir -p ${OUTDIR}/class_instance/EWC_SqueezeNet/
 
 #python -u experiment.py --scenario iid                --n_runs 1 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name EWC  --gpuid 0 --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 20 | tee ${OUTDIR}/iid/EWC_SqueezeNet/log.log
 
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid --lr 0.0001   --reg_coef 100   --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name EWC  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/EWC_SqueezeNet/log.log
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_iid --lr $LR   --reg_coef 100   --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name EWC  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_iid/EWC_SqueezeNet/log.log
 
-python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance --lr 0.0001 --reg_coef 100  --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name EWC  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/EWC_SqueezeNet/log.log
+python -u experiment.py --dataset $DATASET --dataroot $DATAROOT  --output_dir $OUTDIR --scenario class_instance --lr $LR --reg_coef 100  --n_runs 10 --n_epoch_first_task 10 --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type regularization --agent_name EWC  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 21 --n_workers 8 | tee ${OUTDIR}/class_instance/EWC_SqueezeNet/log.log

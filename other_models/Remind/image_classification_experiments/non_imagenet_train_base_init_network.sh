@@ -4,6 +4,7 @@ DATASET="${1:-"null"}" # E.g. core50, toybox, ilab2mlight, cifar100
 SCENARIO="${2:-"null"}" # E.g. class_iid, class_instance
 GPU="${3:-0}" # Default 0, include alternative GPU index as 1st argument to this script
 RUN="${4:-0}"
+LR="${5:-0.001}"
 
 if [ "$DATASET" = "core50" ]; then
     DATAROOT="/n/groups/kreiman/shared_data/core50"
@@ -50,7 +51,7 @@ SAVE_DIR="squeezenet_ckpts"
 CKPT_FILE=SqueezeNetClassifyAfterLayer12_base_init_"$DATASET"_"$SCENARIO"_run${RUN}.pth
 
 CUDA_VISIBLE_DEVICES=${GPU} python -u non_imagenet_train_base_init_network_from_scratch.py \
---lr 0.001 \
+--lr $LR \
 --epochs 10 \
 --scenario "$SCENARIO" \
 --run "$RUN" \

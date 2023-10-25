@@ -12,15 +12,15 @@ memory_size=${7:-0} # Meaningless in pretraining (all replay operations skipped)
 RUNS_STR=$(echo "${RUN}" | sed 's/ /-/g') # If "RUN" is formatted like "0 1 2", replace spaces with dashes
 OUTDIR="${DATASET}_pretrain_16_augmem_rows_run${RUNS_STR}"
 if [ "$DATASET" = "core50" ]; then
-    DDATAROOT="/media/mengmi/KLAB15/Mengmi/proj_CL_NTM/data/core50"
+    DDATAROOT="/media/KLAB37/datasets/Core50"
 elif [ "$DATASET" = "toybox" ]; then
-    DDATAROOT="/media/data/morgan_data/toybox/images"
+    DDATAROOT="/media/KLAB37/datasets/toybox/images"
 elif [ "$DATASET" = "ilab2mlight" ]; then
-    DDATAROOT="/media/data/Datasets/ilab2M/iLab-2M-Light"
+    DDATAROOT="/media/KLAB37/datasets/ilab2M/iLab-2M-Light"
 elif [ "$DATASET" = "cifar100" ]; then
-    DDATAROOT="/home/rushikesh/P1_Oct/cifar100/cifar100png"
+    DDATAROOT="/media/KLAB37/datasets/cifar100"
 elif [ "$DATASET" = "imagenet" ]; then
-    #DDATAROOT="/media/data/Datasets/ImageNet2012"
+    #DDATAROOT="/media/KLAB37/datasets/ImageNet2012"
     DDATAROOT="/n/groups/kreiman/shared_data/Imagenet2012"
 else
     echo "Invalid dataset name!"
@@ -31,4 +31,4 @@ DATAROOT=${8:-${DDATAROOT}}
 
 mkdir -p ${OUTDIR}/iid/Crumb_SqueezeNet_offline
 
-python -u experiment_aug.py --memory_init_strat random_distmatch_sparse --offline --pretraining --scenario iid --save_model_every_epoch --acc_topk 1 5 --replay_times 0 --dataset $DATASET --dataroot $DATAROOT --specific_runs $RUN --n_epoch 1 --n_epoch_first_task 10 --lr ${lr} --n_memblocks ${N_MEMBLOCKS} --memblock_length ${MEMBLOCK_LENGTH} --memory_size ${memory_size} --replay_coef 0 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 128 --n_workers 8 --output_dir ${OUTDIR} | tee ${OUTDIR}/iid/Crumb_SqueezeNet_offline/log.log
+python -u experiment_aug.py --memory_init_strat random_distmatch_sparse --offline --pretraining --scenario iid --save_model --acc_topk 1 5 --replay_times 0 --dataset $DATASET --dataroot $DATAROOT --specific_runs $RUN --n_epoch 1 --n_epoch_first_task 10 --lr ${lr} --n_memblocks ${N_MEMBLOCKS} --memblock_length ${MEMBLOCK_LENGTH} --memory_size ${memory_size} --replay_coef 0 --freeze_feature_extract --model_type squeezenet --model_name SqueezeNet --pretrained --agent_type crumb --agent_name Crumb  --gpuid $GPU --momentum 0.9 --weight_decay 0.0001 --batch_size 128 --n_workers 8 --output_dir ${OUTDIR} | tee ${OUTDIR}/iid/Crumb_SqueezeNet_offline/log.log

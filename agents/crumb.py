@@ -12,6 +12,7 @@ import torch.nn as nn
 from .crumb_net import Net
 from utils.metric import accuracy, AverageMeter, Timer
 import scipy.io as sio
+from welford import Welford
 
 
 class Crumb(nn.Module):
@@ -98,7 +99,13 @@ class Crumb(nn.Module):
 
             if not cfg["visualize"] and not cfg["continuing"]:
                 if cfg["model_name"] == "SqueezeNet":
-                    net.block[1][1] = nn.Conv2d(net.compressedChannel, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
+                    if self.config["crumb_cut_layer"] == 12:
+                        net.block[1][1] = nn.Conv2d(net.compressedChannel, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
+                    elif self.config["crumb_cut_layer"] == 3:
+                        net.block[-2][1] = nn.Conv2d(512, self.config['n_class'], (3, 3), stride=(1, 1), padding=(1, 1))
+                    else:
+                        print("Figure out where in the model you need to make your classification layer")
+                        raise NotImplementedError
                 elif cfg["model_name"] == "MobileNet":
                     net.block[12][1] = nn.Linear(1280, self.config['n_class'])
                 else:
@@ -155,6 +162,11 @@ class Crumb(nn.Module):
         loss = self.criterion_fn(pred, target)
         return loss
 
+    def merec_sample(self, w):  # w is a Welford object from the welford python library
+        mean = w.mean
+        # return torch.Tensor(np.random.multivariate_normal(w.mean, np.diag(w.var_p)))
+        return torch.Tensor(mean + np.random.randn(mean.shape[0]) * np.sqrt(w.var_p))
+
     # replay old reading attention
     def criterion_replay(self, target, storage_type="feature"):
         labelslist = target.tolist()
@@ -162,16 +174,19 @@ class Crumb(nn.Module):
         replay_labels = [cls for cls in self.active_out_nodes
                          if cls not in labelslist and cls in self.memory_storage.keys()]
         replay_batchsize = len(replay_labels)
-        print("REPLAY BATCH SIZE: " + str(replay_batchsize))
         
         if replay_batchsize > 0:
             
             replaytimes = math.ceil(len(labelslist)/replay_batchsize)
+            print("REPLAY BATCH SIZE: " + str(replaytimes * replay_batchsize))
             replay_examples_list = []
 
             # find corresponding memory block indices for replaying classes
             for i in range(replaytimes):
-                temp_store = [self.memory_storage[i][random.randint(0, self.memory_storage[i].size(0) - 1)] for i in replay_labels[0:replay_batchsize]]
+                if storage_type == "merec":
+                    temp_store = [self.merec_sample(self.memory_storage[i]) for i in replay_labels[0:replay_batchsize]]
+                else:
+                    temp_store = [self.memory_storage[i][random.randint(0, self.memory_storage[i].size(0) - 1)] for i in replay_labels[0:replay_batchsize]]
                 replay_examples_list += temp_store
                 replay_labels += replay_labels[0:replay_batchsize]
                 
@@ -182,7 +197,7 @@ class Crumb(nn.Module):
             replay_examples = torch.stack(replay_examples_list)
             if storage_type == "image":
                 replay_read = replay_examples.view(-1, 3, 224, 224)
-            elif storage_type in ["raw_feature", "enhanced_raw_feature"]:
+            elif storage_type in ["raw_feature", "enhanced_raw_feature", "merec"]:
                 replay_read = replay_examples.view(-1, self.net.compressedChannel, self.net.origsz, self.net.origsz)
             elif storage_type == "feature":
                 replay_read = self.net.crumbr.top1_inds_to_fbank(replay_examples.long())
@@ -211,7 +226,7 @@ class Crumb(nn.Module):
                         replay_read[i, :, :, :] = torch.flip(replay_read[i, :, :, :], [1])
             if storage_type == "image":
                 logits = self.net.forward_direct_only(replay_read)
-            elif storage_type in ["feature", "raw_feature", "enhanced_raw_feature"]:
+            elif storage_type in ["feature", "raw_feature", "enhanced_raw_feature", "merec"]:
                 logits = self.net.forward_from_fbanks(replay_read)
             else:
                 raise ValueError("Invalid storage type: '" + str(storage_type) + "'")
@@ -248,10 +263,14 @@ class Crumb(nn.Module):
         pass
         
     # update storage for reading attention and least memory usage indices based after each epoch
-    def updateStorage_epoch(self, train_loader, run, task, img_skip=5):
+    def updateStorage_epoch(self, train_loader, run, task):
         self.net.evalModeOn()       
         print('=====================Storing replay examples=====================')
         avgSampleNum = math.floor(self.capacity/len(self.active_out_nodes))
+        img_skip = math.floor(( ((len(train_loader)-1)*self.config["batch_size"]) / self.config["memory_size"])) # * (len(self.active_out_nodes) / self.config["n_class"]))
+        print("IMG_SKIP:", img_skip)
+        if img_skip < 1:
+            img_skip = 1
 
         raw_feature_maps_save = []
         reconstr_feature_maps_save = []
@@ -289,26 +308,43 @@ class Crumb(nn.Module):
             else:
                 stored_ex = self.net.images_to_storage(inputs, storage_type=self.config["storage_type"])
 
-            all_classes_full = True  # Will be set to False if any class is not at capacity
-            for cls in self.active_out_nodes:
-                all_examples_storage_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
-                if len(all_examples_storage_list) > 0:
-                    selected_examples_storage = torch.stack(all_examples_storage_list[0::img_skip], dim=0)
+            # Zhang, Baosheng, Yuchen Guo, Yipeng Li, Yuwei He, Haoqian Wang, and Qionghai Dai.
+            # "Memory recall: A simple neural network training framework against catastrophic forgetting."
+            # IEEE Transactions on Neural Networks and Learning Systems 33, no. 5 (2021): 2010-2022.
+            if self.config["storage_type"] == "merec":
+                for cls in self.active_out_nodes:
 
-                    if cls in self.memory_storage:
-                        self.memory_storage[cls] = torch.cat((self.memory_storage[cls], selected_examples_storage), dim=0)
+                    if cls not in self.memory_storage:
+                        self.memory_storage[cls] = Welford()
+
+                    class_examples_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
+                    for ex in class_examples_list:
+                        self.memory_storage[cls].add(ex.numpy())
+
+            else:
+                all_classes_full = True  # Will be set to False if any class is not at capacity
+                for cls in self.active_out_nodes:
+                    all_examples_storage_list = [stored_ex[i] for i in range(stored_ex.size(0)) if target[i] == cls]
+                    if len(all_examples_storage_list) > 0:
+                        selected_examples_storage = torch.stack(all_examples_storage_list[0::img_skip], dim=0)
+
+                        if cls in self.memory_storage:
+                            self.memory_storage[cls] = torch.cat((self.memory_storage[cls], selected_examples_storage), dim=0)
+                        else:
+                            self.memory_storage[cls] = selected_examples_storage
+
+                    # Pop out old examples (queue). Stored examples from old classes need to make space for new classes
+                    if cls in self.memory_storage and self.memory_storage[cls].size(0) >= avgSampleNum:
+                        # In "adaptive storage", shuffle the storage of each class to ensure iid removal of examples
+                        perm = torch.randperm(self.memory_storage[cls].size(0))
+                        self.memory_storage[cls] = self.memory_storage[cls][perm]
+                        self.memory_storage[cls] = self.memory_storage[cls][(self.memory_storage[cls].size(0) - avgSampleNum):, :]
                     else:
-                        self.memory_storage[cls] = selected_examples_storage
+                        all_classes_full = False
 
-                # Pop out old examples (queue). Stored examples from old classes need to make space for new classes
-                if cls in self.memory_storage and self.memory_storage[cls].size(0) >= avgSampleNum:
-                    self.memory_storage[cls] = self.memory_storage[cls][(self.memory_storage[cls].size(0) - avgSampleNum):, :]
-                else:
-                    all_classes_full = False
-
-            if all_classes_full:
-                print("Stored sufficient examples for all classes")
-                break
+                if all_classes_full:
+                    print("Stored sufficient examples for all classes")
+                    break
 
         if self.config["storage_type"] == "enhanced_raw_feature":
             # Save feature tensors for analysis
@@ -319,13 +355,14 @@ class Crumb(nn.Module):
             np.save(os.path.join(self.config["full_out_dir"], "enhanced_fm_r" + str(run) + "_t" + str(task)), np.vstack(enhanced_feature_maps_save))
             np.save(os.path.join(self.config["full_out_dir"], "target_r" + str(run) + "_t" + str(task)), np.vstack(target_save))
 
-        # Print memory storage stats
-        for cls in self.active_out_nodes:
-            print("Number of samples stored for class id " + str(cls) + ": " + str(self.memory_storage[cls].size(0)))
-        sz_bytes = sum([sys.getsizeof(att_tensor.storage()) for att_tensor in self.memory_storage.values()])
-        num_ex = sum([att_tensor.size(0) for att_tensor in self.memory_storage.values()])
-        assert num_ex <= self.capacity, "Exceeded replay attention storage. Trying to store " + str(num_ex) + " examples with capacity=" + str(self.capacity)
-        print("Size of replay attention storage for " + str(num_ex) + " examples in bytes: " + str(sz_bytes))
+        if not self.config["storage_type"] == "merec":
+            # Print memory storage stats
+            for cls in self.active_out_nodes:
+                print("Number of samples stored for class id " + str(cls) + ": " + str(self.memory_storage[cls].size(0)))
+            sz_bytes = sum([sys.getsizeof(att_tensor.storage()) for att_tensor in self.memory_storage.values()])
+            num_ex = sum([att_tensor.size(0) for att_tensor in self.memory_storage.values()])
+            assert num_ex <= self.capacity, "Exceeded replay attention storage. Trying to store " + str(num_ex) + " examples with capacity=" + str(self.capacity)
+            print("Size of replay attention storage for " + str(num_ex) + " examples in bytes: " + str(sz_bytes))
 
         if self.config["storage_type"] == "feature":
             # update least used memory slots
@@ -460,12 +497,17 @@ class Crumb(nn.Module):
             #classification loss
             loss_classiout = self.criterion_classi(output_logits, target)
             loss_classidir = self.criterion_classi(direct_logits, target)
-            if self.config['pretraining']:
-                loss = loss_classiout + loss_classidir
+            if self.config['pretraining'] or self.config['plus_direct_loss']:
+                if self.config['pt_only_codebook_out_loss']:
+                    # This is unablated CRUMB's loss during pretraining
+                    loss = loss_classiout + loss_classidir
+                else:
+                    loss = loss_classiout + (0*loss_classidir)
             else:
-                if self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]:
+                if (self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]) or self.config['direct_loss_only']:
                     loss = (0*loss_classiout) + loss_classidir
                 else:
+                    # This is unablated CRUMB's loss during stream learning
                     loss = loss_classiout + (0*loss_classidir)
 
             loss.backward()
@@ -525,9 +567,10 @@ class Crumb(nn.Module):
         # END of epoch train data
         # UPDATE storage of reading attention
         # UPDATE least used memory slot indices
-        if not self.config['pretraining']: # no need for storing replay examples during pretraining
+        if not self.config['pretraining']:  # no need for storing replay examples during pretraining
             if task > 0 or self.config['replay_in_1st_task'] or (task == 0 and epoch == self.config['n_epoch_first_task']-1):
-                self.updateStorage_epoch(train_loader, run, task)
+                if not task == self.config['ntask']-1:  # no need for storing replay examples after the last task
+                    self.updateStorage_epoch(train_loader, run, task)
 
         return mem_stats
 

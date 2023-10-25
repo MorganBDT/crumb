@@ -9,7 +9,13 @@ def accuracy(output, target, topk=(1,)):
         batch_size = target.size(0)
 
         # prediction vectors are stacked along the batch dimension (dim zero)
-        _, pred = output.topk(k=maxk, dim=1, largest=True, sorted=True)
+
+        try: 
+            _, pred = output.topk(k=maxk, dim=1, largest=True, sorted=True)
+        except IndexError as e:
+            print("ANOMALY! ignoring outputs of size:", output.size())
+            return [None for _ in topk]
+            
         pred = pred.t()
         correct = pred.eq(target.view(1, -1).expand_as(pred))
         
