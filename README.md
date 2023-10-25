@@ -5,7 +5,7 @@ Authors: Morgan Talbot*, Rushikesh Zawar*, Rohil Badkundri, Mengmi Zhang†, and
 
 ## Project description 
 
-Stream learning refers to the ability to acquire and transfer knowledge across a continuous stream temporally correlated  data without forgetting and without repeated passes over the data. A common way to avoid catastrophic forgetting is to intersperse new examples with replays of old examples stored as image pixels or reproduced by generative models. We propose a new continual learning algorithm, Compositional Replay Using Memory Blocks (CRUMB), which mitigates forgetting by replaying feature maps reconstructed by recombining generic parts. Just as crumbs together form a loaf of bread, we concatenate trainable and re-usable "memory block" vectors to compositionally reconstruct feature map tensors in convolutional neural networks. CRUMB stores the indices of memory blocks used to reconstruct new stimuli, enabling replay of specific memories during later tasks. CRUMB's memory blocks are tuned to enhance replay: a single feature map stored, reconstructed, and replayed by CRUMB mitigates forgetting during video stream learning more effectively than an entire image while occupying only 3.6\% of the memory. We stress-tested CRUMB alongside 13 competing methods on 5 challenging datasets. To address the limited number of existing online stream learning datasets, we introduce 2 new benchmarks (Toybox and iLab) by adapting existing datasets for stream learning. With about 4% of the memory and 20% of the runtime, CRUMB mitigates catastrophic forgetting more effectively than the prior state of the art.
+Stream learning refers to the ability to acquire and transfer knowledge across a continuous stream temporally correlated  data without forgetting and without repeated passes over the data. A common way to avoid catastrophic forgetting is to intersperse new examples with replays of old examples stored as image pixels or reproduced by generative models. We propose a new continual learning algorithm, Compositional Replay Using Memory Blocks (CRUMB), which mitigates forgetting by replaying feature maps reconstructed by recombining generic parts. CRUMB concatenates trainable and re-usable "memory block" vectors to compositionally reconstruct feature map tensors in convolutional neural networks, like crumbs forming a loaf of bread. CRUMB stores the indices of memory blocks used to reconstruct new stimuli, enabling replay of specific memories during later tasks. This reconstruction mechanism also primes the neural network to minimize catastrophic forgetting by forcing it to attend to information about object shapes more than information about image textures, and stabilizes the network during stream learning by providing a shared feature-level basis for all training examples. These properties allow CRUMB to outperform an otherwise identical algorithm that stores and replays raw images while occupying only 3.6% as much memory. We stress-tested CRUMB alongside 13 competing methods on 7 challenging datasets. To address the limited number of existing online stream learning datasets, we introduce 2 new benchmarks (Toybox and iLab) by adapting existing datasets for stream learning. With about 4% as much memory and 30% as much runtime, CRUMB mitigates catastrophic forgetting more effectively than the prior state of the art.
 
 ## Setup
 
@@ -64,6 +64,18 @@ This project uses three video datasets: CORe50, Toybox, and iLab-2M-Light. Each 
 6. Distribute the images in the dataset to a nested directory structure by running the ilab2mlight_distribute_img_dirs.py script. The dataset comes by default with all of the images massed together in one directory, and this can make loading the data very slow during training. Navigate to the "dataloaders" folder and run "python ilab2mlight_distribute_img_dirs.py <dataset_path> <distributed_dataset_path>". The <distributed_dataset_path> should be a path to a new directory in which the distributed version of the dataset will be placed. Make sure you have enough room on your HDD/SSD before running this script, as it will make a copy of all of the sampled iamges in the dataset. This script will take several hours to run (e.g. maybe 12 hours). When it's finished, you should have "ilab2mlight_dirmap.py" in the "dataloaders" directory.
 7. From the root project directory, run "sh scripts/setup_tasks_ilab2mlight.sh". This should only take a few minutes. You should now see a new folder in the "dataloaders" directory called "ilab2mlight_task_filelists"
 
+### iCubWorld Transformations dataset
+
+1. Download the iCubWorld Transformations dataset from [this page](https://robotology.github.io/iCubWorld/#icubworld-transformations-modal). 
+2. Extract everything into a dataset called "icubworldtransf" that contains directories "part1", "part2", "part3", and "part4". 
+3. Run the icub python script as "python dataloaders/icubworldtransf_dirmap.py --dataset_root my/path/to/icubworldtransf"
+4. OPTIONAL: To save space on your computer, run "python dataloaders/icubworldtransf_sparse.py" (be sure to change the definition of variable "dataset_root_dir" in that script first). It will make a new dataset directory alongside the first one with only the subset of images you need for our benchmark (which is much fewer than in the entire original dataset, which has a high frame rate and both left and right cams)
+5. From the root project directory, run "sh scripts/setup_tasks_icubworldtransf.sh". This should only take a few minutes. You should now see a new folder in the "dataloaders" directory called "icubworldtransf_task_filelists"
+
+### iLab+CORe50 dataset
+
+1. From the root project directory, run "sh scripts/setup_tasks_ilab2mlight+core50.sh". This should only take a few minutes. You should now see a new folder in the "dataloaders" directory called "ilab2mlight+core50_task_filelists"
+
 ## Running CRUMB
 
 First, conduct additional pretraining of CRUMB for 10 epochs on ImageNet by running the script:
@@ -84,7 +96,7 @@ A new results folder for STREAM LEARNING should appear in the root directory of 
 
 The instructions above will complete 10 runs of stream learning (5 for imagenet) based off of a single pretraining run on imagenet. For 5 stream learning runs using 5 independent pretraining runs, see instructions in ./scripts/crumb_stream_1run_per_pt.sh. 
 
-The file that contains the accuracy used for the paper will be called "top1_test_all_direct_all_runs.csv". 
+The file that contains the accuracy used for the paper will be called "top1_test_all_direct_all_runs.csv". If you average the final column, you should get results similar to entries from the main table in the paper. 
 The naming convention for the .csv files is as follows with variable parts indicated by < >: 
 ```
 top<k>_test_<tasks_included>_<model_feature_source>_all_runs.csv"
@@ -96,7 +108,7 @@ and model_feature_source is "direct" for all results used in this paper. "mem" i
 The all_epochs folder contains accuracies for all training epochs - e.g. if we trained on the first task for multiple epochs, the model's accuracy after each epoch can be found in a .csv in this folder. 
 
 ## Running baseline algorithms
-Make sure that one is at the root of the repository. Run the following (for example) to train and save results of individual algorithm on CoRE50 dataset:
+Make sure that your current working directory is at the root of the repository. Run the following (for example) to train and save results of individual algorithm on CoRE50 dataset:
 ```
 ./scripts/optimal_core50/EWC.sh core50 0
 ```
@@ -117,35 +129,32 @@ Scripts/ablation/ablation_all_batches.sh followed by network_analysis_stats.py c
 
 This is the correspondence between the model analysis arms in the paper (some may be in supplementary materials) and the scripts: 
 * **Ours**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt.sh
+* **Image replay**: (no CRUMB pretraining) -> crumb_stream_1run_per_no_pt_image_replay.sh
+* **Ours p.t. + im. rep.**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_image_replay.sh
 * **Early feature replay**: crumb_pretrain_imagenet_cutlayer_3.sh -> crumb_stream_1run_per_pt_cutlayer_3.sh
-* **Image replay**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_image_replay.sh
-* **CIFAR100 pretrain**: crumb_pretrain_cifar100.sh -> crumb_stream_1run_per_pt.sh
-* **Random CRUMB**: (no pretraining) -> crumb_stream_1run_per_pt.sh
-* **Freeze memory**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_freeze_memory.sh
+* **MeRec replay**: (no CRUMB pretraining) -> crumb_stream_1run_per_no_pt_merec.sh
 * **Half capacity**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_half_mem_cap.sh
 * **Quarter capacity**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_quarter_mem_cap.sh
 * **No replay**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_no_replay.sh
-* **Ours+-direct loss & Direct loss**: see below this list
-* **Different number of memory blocks**: crumb_pretrain_imagenet_n_codebook_rows.sh (with n replaced by the number of blocks, must be power of 2 <= 512 or add another script..) -> crumb_stream_1run_per_pt.sh (but specify the codebook size as a command line argument, like ./scripts/ablation crumb_stream_1run_per_pt.sh core50 0 <pretraining_dir> n_memory_blocks 1000 **n**)
-* **Different memory block size**: crumb_pretrain_imagenet_n_codebook_feat.sh -> crumb_stream_1run_per_pt.sh (but specify the codebook size as a command line argument, like ./scripts/ablation crumb_stream_1run_per_pt.sh core50 0 <pretraining_dir> n_memory_blocks 1000 256 **n**)
+* **Vanilla pretrain**: (no CRUMB pretraining) -> crumb_stream_1run_per_pt.sh
+* **Pretrain weights**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_weights_only.sh
+* **Pretrain mem. blocks**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_memblocks_only.sh
+* **CIFAR100 pretrain**: crumb_pretrain_cifar100.sh -> crumb_stream_1run_per_pt.sh
+* **Freeze memory**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_freeze_memory.sh
 * **Normal init.**: crumb_pretrain_imagenet_stdnml.sh -> crumb_stream_1run_per_pt.sh
 * **Uniform init.**: crumb_pretrain_imagenet_uniform.sh -> crumb_stream_1run_per_pt.sh
 * **Dense matched init.**: crumb_pretrain_imagenet_distmatch_dense.sh -> crumb_stream_1run_per_pt.sh
+* **Different number of memory blocks**: crumb_pretrain_imagenet_n_codebook_rows.sh (with n replaced by the number of blocks, must be power of 2 <= 512 or add another script..) -> crumb_stream_1run_per_pt.sh (but specify the codebook size as a command line argument, like ./scripts/ablation crumb_stream_1run_per_pt.sh core50 0 <pretraining_dir> n_memory_blocks 1000 **n**)
+* **Different memory block size**: crumb_pretrain_imagenet_n_codebook_feat.sh -> crumb_stream_1run_per_pt.sh (but specify the codebook size as a command line argument, like ./scripts/ablation crumb_stream_1run_per_pt.sh core50 0 <pretraining_dir> n_memory_blocks 1000 256 **n**)
+* **Ours - direct loss**: crumb_pretrain_imagenet_no_direct_loss.sh -> crumb_stream_1run_per_pt.sh
+* **Ours + direct loss**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_plus_direct_loss.sh
+* **Direct loss**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_direct_loss_only.sh
+* **MobileNetV2 CNN**: crumb_pretrain_imagenet_MobileNet_normal.sh -> crumb_stream_1run_per_pt_MobileNet.sh
 
-For loss function ablations, you must modify the following segment of code in **agents/crumb.py** before running crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt.sh as in "Ours": 
-```
-if self.config['pretraining']:
-    loss = loss_classiout + loss_classidir
-else:
-    if self.config["storage_type"] in ["image", "raw_feature", "enhanced_raw_feature"]:
-        loss = (0*loss_classiout) + loss_classidir
-    else:
-        loss = loss_classiout + (0*loss_classidir)
-```
-* **Ours - direct loss**: delete loss_classidir from the 'pretraining' part of the if statement (loss fn for pretraining) 
-* **Ours + direct loss**: delete the 0 in (0*classidir) in the very last line (loss fn for stream learning)
-* **Direct loss**: Implement the same change as for Ours + direct loss, and then also change loss_classiout to (0*loss_classiout) in that same line. 
+For **Ours** vs **Image replay** on datasets other than CORe50, use the same scripts as above but specify a different dataset as the first command line argument to the script. For **Ours** vs **Image replay** in CORe50 with varying memory capacities (e.g., here with 6400 total images that can be stored, more than the size of the whole dataset):
+* **Ours**: crumb_pretrain_imagenet_unablated.sh -> crumb_stream_1run_per_pt_var_mem_cap.sh core50 0 6400
+* **Image replay**: (no CRUMB pretraining) -> crumb_stream_1run_per_no_pt_image_replay_var_mem_cap.sh core50 0 6400
 
 ## License
-See [Kreiman lab](http://klab.tch.harvard.edu/code/license_agreement.pdf) for license agreements before downloading and using our source codes and datasets. The source code is intended for illustration purposes only. We do not provide technical support, but we would be happy to discuss about SCIENCE!
+See [Kreiman lab](http://klab.tch.harvard.edu/code/license_agreement.pdf) for license agreements before downloading and using our source codes and datasets. The source code is intended for illustration purposes only. We do not provide technical support, but we would be happy to discuss science! 
 
