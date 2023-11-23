@@ -19,6 +19,7 @@ def get_args(argv):
 args = get_args(sys.argv[1:])
 
 plt.style.use("fivethirtyeight")
+plt.rcParams["font.family"] = "Nimbus Sans"
 
 if args.scenario == "class_instance":
     datasets = ["ImageNet-Pretraining", "CORe50", "Toybox", "iLab", "iCub", "iLab+CORe50", "Online-CIFAR100", "Online-ImageNet"]
@@ -172,17 +173,18 @@ for idx, (cond, vals) in enumerate(crumb_adv_values.items()):
     bars.append(bar)
 
 if args.scenario == "class_instance":
-    ax.legend(loc='upper right', fontsize=18) #, ncols=3, borderpad=0.3, columnspacing=0.5)
-    ax.set_ylim([-0.23, 0.21])
+    ax.legend(loc='upper right', fontsize=20) #, ncols=3, borderpad=0.3, columnspacing=0.5)
+    ax.set_ylim([-0.225, 0.24])
     low_ast_offset = 0.038
     high_ast_offset = 0.0005
+    plt.xticks(rotation=60)
 else:
-    ax.legend(loc='upper left', fontsize=18)
+    ax.legend(loc='upper left', fontsize=20)
     ax.set_ylim([-0.34, 0.3])
     low_ast_offset = 0.05
     high_ast_offset = 0.0005
-plt.xticks(rotation=60)
-ax.tick_params(axis='both', which='major', labelsize=18)
+    plt.xticks(rotation=45)
+ax.tick_params(axis='both', which='major', labelsize=22)
 for i, bar in enumerate(ax.patches):
     bar.set_edgecolor('black')
 
@@ -195,12 +197,12 @@ for idx, (cond, significance) in enumerate(sigs.items()):
             else:  # Bars below zero
                 height = bars[idx][i].get_height() - errors[cond][i] - low_ast_offset  # offset by 0.05 for visibility below bar
             ax.text(bars[idx][i].get_x() + bars[idx][i].get_width()/2.0, height, '*', ha='center', va='bottom',
-                    color='black', fontsize=24, fontweight='bold')
+                    color='black', fontsize=28, fontweight='bold')
 
 # Formatting
 ax.set_xticks(np.arange(len(datasets)) + width)
 ax.set_xticklabels(dataset_labels)
-ax.set_ylabel("Relative accuracy advantage of CRUMB", fontsize=20)
+ax.set_ylabel("Relative accuracy advantage of CRUMB", fontsize=24)
 #ax.set_xlabel("Datasets", fontsize=20)
 # ax.set_title("Relative advantage across different datasets", fontsize=20)
 ax.axhline(0, color='black', linewidth=2)  # Thick horizontal line at y=0
