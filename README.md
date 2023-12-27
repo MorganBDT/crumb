@@ -1,6 +1,6 @@
 # Compositional Replay Using Memory Blocks (CRUMB)
 
-From the paper "Tuned Compositional Feature Replays for Efficient Stream Learning."
+From the paper "[Tuned Compositional Feature Replays for Efficient Stream Learning](http://klab.tch.harvard.edu/publications/PDFs/gk8019.pdf)."
 Authors: Morgan Talbot*, Rushikesh Zawar*, Rohil Badkundri, Mengmi Zhang†, and Gabriel Kreiman† (* equal contribution, † corresponding authors)
 
 ## Project description 
